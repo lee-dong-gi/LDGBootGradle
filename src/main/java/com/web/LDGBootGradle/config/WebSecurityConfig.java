@@ -22,7 +22,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
-                .csrf().disable()
+                .csrf().disable()   //form을 submit할때 보내는 csrf토큰을 안보내도록 설정
             .authorizeRequests()
                 .antMatchers("/","/account/register","/css/**","/api/**").permitAll()
                 .anyRequest().authenticated()
