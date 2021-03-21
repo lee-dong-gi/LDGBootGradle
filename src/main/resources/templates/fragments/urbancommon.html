@@ -14,34 +14,33 @@
 <body>
   <div th:fragment="top(top)">
     <!-- Header -->
-      <header id="header" class="alt">
-        <!--
-        <div class="logo"><b><a th:href="@{/urban}" href="urbanindex.html">생각하는 <span>참새</span></a></b></div>
-        <a th:href="@{/account/login}" href="#" class="button"><i class="fas fa-sign-in-alt">Login</i></a>
+    <header id="header" class="alt">
+      <!--
+      <div class="logo"><b><a th:href="@{/urban}" href="urbanindex.html">생각하는 <span>참새</span></a></b></div>
+      <a th:href="@{/account/login}" href="#" class="button"><i class="fas fa-sign-in-alt">Login</i></a>
+      -->
+      <div class="logo"><a th:href="@{/urban}" href="urbanindex.html"><i class="fas fa-home"></i></a></div>
+      <a th:href="@{/account/login}" class="mx-1 button special small"
+        sec:authorize="!isAuthenticated()"><i class="fas fa-sign-in-alt"> Sign In</i></a>
+      <a th:href="@{/account/register}" class="mx-1 button special small"
+        sec:authorize="!isAuthenticated()"><i class="fas fa-user-plus"> Sign Up</i></a>
+      <form th:action="@{/logout}" method="POST" sec:authorize="isAuthenticated()" style="display: inline-block;">
+        <span class="mx-2" sec:authentication="name">사용자</span>
+        <span class="mx-2" sec:authentication="principal.authorities">권한</span>
+        <button class="mx-1 button special small" type="submit" sec:authorize="isAuthenticated()"><i class="fas fa-sign-out-alt">Logout</i></button>
+      </form>
+      <a href="#menu" class="mx-1 button special small">Menu</a>
+    </header>
 
-        -->
-        <div class="logo"><a th:href="@{/urban}" href="urbanindex.html"><i class="fas fa-home"></i></a></div>
-        <a th:href="@{/account/login}" class="mx-1 button special small"
-          sec:authorize="!isAuthenticated()"><i class="fas fa-sign-in-alt"> Sign In</i></a>
-        <a th:href="@{/account/register}" class="mx-1 button special small"
-          sec:authorize="!isAuthenticated()"><i class="fas fa-user-plus"> Sign Up</i></a>
-        <form th:action="@{/logout}" method="POST" sec:authorize="isAuthenticated()">
-          <span class="text-white mx-2" sec:authentication="name">사용자</span>
-          <span class="text-white mx-2" sec:authentication="principal.authorities">권한</span>
-          <button class="btn btn-outline-success" type="submit" sec:authorize="isAuthenticated()"><i class="fas fa-sign-out-alt">Logout</i></button>
-        </form>
-        <a href="#menu" class="mx-1 button special small">Menu</a>
-      </header>
-
-      <!-- Nav -->
-      <nav id="menu">
-        <ul class="links">
-          <li><a th:href="@{/urban}" href="index.html">Home</a></li>
-          <li><a href="#" th:href="@{/board/list}" th:classappend="${menu} == 'board' ? 'active'">Board</a></li>
-          <li><a th:href="@{/elements.html}" href="elements.html">Elements</a></li>
-        </ul>
-      </nav>
-    </div>
+    <!-- Nav -->
+    <nav id="menu">
+      <ul class="links">
+        <li><a th:href="@{/urban}" href="index.html">Home</a></li>
+        <li><a href="#" th:href="@{/board/list}" th:classappend="${menu} == 'board' ? 'active'">Notice</a></li>
+        <li><a th:href="@{/elements.html}" href="elements.html">Chat</a></li>
+      </ul>
+    </nav>
+  </div>
 </body>
 
 </html>
