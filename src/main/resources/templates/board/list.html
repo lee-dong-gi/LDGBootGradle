@@ -1,7 +1,7 @@
 <!doctype html>
 <html xmlns:th="http://www.thymeleaf.org">
 
-<head th:replace="fragments/common :: head('게시판')">
+<head th:replace="fragments/urbancommon :: head('게시판')">
   <!-- Required meta tags -->
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -13,11 +13,11 @@
   <!-- Custom styles for this  template -->
   <link href="starter-template.css" th:href="@{/starter-template.css}" rel="stylesheet"/>
 
-  <title>게시판</title>
+  <title>board</title>
 </head>
 
 <body>
-  <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top" th:replace="fragments/common :: menu('board')">
+  <div th:replace="fragments/urbancommon :: top('board')">
     <!--  <div class="container-fluid">
       <a class="navbar-brand" href="#">Spring Boot Tutorial</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
@@ -34,10 +34,10 @@
         </ul>
       </div>
     </div>-->
-  </nav>
+  </div>
 
   <div class="container">
-    <h2>게시판</h2>
+    <h2>notice</h2>
     <div>총 건수 : <span th:text="${boards.totalElements}"></span></div>
     <form class="row g-3 d-flex justify-content-end" method="GET" th:action="@{/board/list}">
       <div class="col-auto">
@@ -45,7 +45,7 @@
         <input type="text" class="form-control" id="searchText" name="searchText" th:value="${param.searchText}">
       </div>
       <div class="col-auto">
-        <button type="submit" class="btn btn-light mb-2">검색</button>
+        <button type="submit" class="button alt mb-2"><i class="fas fa-search">검색</i></button>
       </div>
     </form>
     <table class="table table-striped">
@@ -58,7 +58,11 @@
       </thead>
       <tbody>
         <tr th:each="board : ${boards}">
+          <td th:text="${board.num}">1</td>
+          <!--
+          <td th:text="(${boards.totalElements}+1) - ${num.count}">1</td>
           <td th:text="${board.id}">1</td>
+          -->
           <td><a th:text="${board.title}" th:href="@{/board/form(id=${board.id})}">Otto</a></td>
           <td th:text="${board.user.username}">홍길동</td>
         </tr>

@@ -1,7 +1,7 @@
 <!doctype html>
 <html xmlns:th="http://www.thymeleaf.org">
 
-<head>
+<head th:replace="fragments/urbancommon :: head('Hello Sparrow')">
   <!-- Required meta tags -->
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -11,39 +11,50 @@
 
   <title>Login</title>
 
-  <!-- Custom styles for this template -->
-  <link th:href="@{/css/signin.css}" rel="stylesheet">
+  <style>
+  body
+    {
+      background-color: #000;
+    }
+  </style>
 </head>
 
-<body class="text-center">
-  <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top" th:replace="fragments/common :: menu('')"></nav>
-  <main class="form-signin">
-    <form th:action="@{/account/login}" method="post"><!-- th: 를 붙여줘야 csrf토큰이 같이 전송됨-->
-      <a th:href="@{/}">
-        <img class="mb-4" src="https://getbootstrap.com/docs/5.0/assets/brand/bootstrap-logo.svg" alt="" width="72" height="57">
-      </a>
-      <h1 class="h3 mb-3 fw-normal">Please sign in</h1>
-
-      <div th:if="${param.error}" class="alert alert-danger" role="alert">
-          Invalid username and password.
+<body>
+  <div th:replace="fragments/urbancommon :: top('login')"></div>
+  <br/><br/><br/><br/>
+  <!-- Main -->
+  <div id="main">
+    <section class="wrapper style1">
+      <div class="inner">
+        <div class="align-center">
+          <div class="row uniform">
+            <div class="6u 12u$(xsmall)">
+              <h1 class="h3 mb-3 fw-normal"><strong>Please sign in</strong></h1>
+              <form th:action="@{/account/login}" method="post"><!-- th: 를 붙여줘야 csrf토큰이 같이 전송됨-->
+                <div th:if="${param.error}" class="alert alert-danger" role="alert">
+                    Invalid username and password.
+                </div>
+                <div th:if="${param.logout}" class="alert alert-primary" role="alert">
+                    You have been logged out.
+                </div>
+                <input type="text" id="username" name="username" class="form-control" placeholder="Username" required autofocus>
+                <label for="inputPassword" class="visually-hidden">Password</label>
+                <input type="password" id="inputPassword" name="password" class="form-control" placeholder="Password" required>
+                <button class="my-3 w-100 btn btn-lg btn-primary" type="submit">Sign in</button>
+              </form>
+            </div>
+            <div class="6u 12u$(xsmall)">
+              <div class="image fit">
+                <a href="generic.html" class="link"><img th:src="@{/images/building.jpg}" src="images/building.jpg" alt="building" /></a>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-      <div th:if="${param.logout}" class="alert alert-primary" role="alert">
-          You have been logged out.
-      </div>
-
-      <label for="username" class="visually-hidden">Username</label>
-      <input type="text" id="username" name="username" class="form-control" placeholder="Username" required autofocus>
-      <label for="inputPassword" class="visually-hidden">Password</label>
-      <input type="password" id="inputPassword" name="password" class="form-control" placeholder="Password" required>
-      <div class="checkbox mb-3">
-        <!--<label>
-          <input type="checkbox" value="remember-me"> Remember me
-        </label-->
-      </div>
-      <button class="w-100 btn btn-lg btn-primary" type="submit">Sign in</button>
-      <p class="mt-5 mb-3 text-muted">&copy; 2017–2021</p>
-    </form>
-  </main>
+    </section>
+  </div>
+  <!-- Footer -->
+  <footer id="footer" th:replace="fragments/footer :: footer('footer')"></footer>
 </body>
 
 </html>

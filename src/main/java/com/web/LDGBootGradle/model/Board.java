@@ -20,4 +20,7 @@ public class Board {
     @JoinColumn(name="user_id")
     @JsonIgnore
     private User user;
+
+    @Transient
+    private int num;
 }

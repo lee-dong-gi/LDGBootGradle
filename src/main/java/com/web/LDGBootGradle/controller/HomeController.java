@@ -8,6 +8,11 @@ public class HomeController {
 
     @GetMapping
     public String index(){
-        return "index";
+        return "urbanindex";
+    }
+
+    @GetMapping("/urban")
+    public String urbanindex(){
+        return "urbanindex";
     }
 }

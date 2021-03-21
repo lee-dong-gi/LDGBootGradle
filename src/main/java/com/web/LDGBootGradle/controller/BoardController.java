@@ -19,6 +19,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.persistence.OrderBy;
 import javax.validation.Valid;
+import java.util.ArrayList;
+import java.util.List;
 
 @Controller
 @RequestMapping("/board")
@@ -35,10 +37,26 @@ public class BoardController {
     private Board board;
 
     @GetMapping("/list")
-    public String list(Model model,@PageableDefault(size = 3) Pageable pageable,
+    public String list(Model model,@PageableDefault(size = 10) Pageable pageable,
                        @RequestParam(required = false, defaultValue = "") String searchText){
         // Page<Board> boards = boardRepository.findAll(pageable);
-        Page<Board> boards = boardRepository.findByTitleContainingOrContentContaining(searchText, searchText, pageable);
+        Page<Board> boards = boardRepository.findByTitleContainingOrContentContainingOrderByIdDesc(searchText, searchText, pageable);
+        //=========================numbering===========================================================================
+        int num = 0, result = 0, pagesize = 10;
+        int totalElements = (int)boards.getTotalElements()+1;
+        int nowpage = pageable.getPageNumber()+1;
+        System.out.println("nowpage :: "+nowpage);
+        System.out.println("totalElements :: "+(totalElements-1));
+        for (Board temp : boards){
+            num++;
+            if (nowpage==1){
+                result=totalElements-num;
+            }else{
+                result = totalElements-(((nowpage*pagesize)-pagesize)+num);
+            }
+            temp.setNum(result);
+        }
+        //====================================================================================================
         int startPage = Math.max(1 , boards.getPageable().getPageNumber() - 4);
         int endPage = Math.min(boards.getTotalPages() , boards.getPageable().getPageNumber() + 4);
         model.addAttribute("startPage",startPage);
