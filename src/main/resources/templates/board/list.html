@@ -32,6 +32,7 @@
                   <th scope="col">No</th>
                   <th scope="col">Title</th>
                   <th scope="col">Writer</th>
+                  <th scope="col">WriteDate</th>
                 </tr>
               </thead>
               <tbody>
@@ -39,6 +40,7 @@
                   <td th:text="${board.num}">1</td>
                   <td><a th:text="${board.title}" th:href="@{/board/form(id=${board.id})}">Otto</a></td>
                   <td th:text="${board.user.username}">홍길동</td>
+                  <td th:text="${board.createdDate}">홍길동</td>
                 </tr>
               </tbody>
             </table>

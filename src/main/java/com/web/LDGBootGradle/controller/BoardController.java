@@ -1,8 +1,11 @@
 package com.web.LDGBootGradle.controller;
 
 import com.web.LDGBootGradle.model.Board;
+import com.web.LDGBootGradle.model.UploadFile;
 import com.web.LDGBootGradle.repository.BoardRepository;
+import com.web.LDGBootGradle.repository.FileRepository;
 import com.web.LDGBootGradle.service.BoardService;
+import com.web.LDGBootGradle.service.FileService;
 import com.web.LDGBootGradle.validator.BoardValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -16,11 +19,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
-import javax.persistence.OrderBy;
 import javax.validation.Valid;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Controller
 @RequestMapping("/board")
@@ -34,6 +39,13 @@ public class BoardController {
 
     @Autowired
     private BoardValidator boardValidator;
+
+    @Autowired
+    private FileRepository fileRepository;
+
+    @Autowired
+    private FileService fileService;
+
     private Board board;
 
     @GetMapping("/list")
@@ -77,7 +89,7 @@ public class BoardController {
     }
 
     @PostMapping("/form")
-    public String postform(@Valid Board board, BindingResult result, Authentication authentication) {
+    public String postform(@Valid Board board, BindingResult result, Authentication authentication, @RequestParam("file") MultipartFile files) {
 
         System.out.println(result.toString());
         boardValidator.validate(board, result);
@@ -86,9 +98,57 @@ public class BoardController {
             System.out.println(result.toString());
             return "board/form";
         }
+
+        if (!files.isEmpty()){
+            List<UploadFile> UploadFileId = fileupload(files);
+            int listsize = UploadFileId.size()-1;
+            if (listsize < 0 || UploadFileId.isEmpty()){
+                board.setUploadFileId(UploadFileId.get(0).getUploadFileId());
+            }else {
+                board.setUploadFileId(UploadFileId.get(listsize).getUploadFileId());
+            }
+        }
+
         String username= authentication.getName();
         boardService.save(username, board);
+
         //boardRepository.save(board);
         return "redirect:/board/list";
+    }
+
+    //파일 업로드
+    List<UploadFile> fileupload(MultipartFile files){
+        UploadFile uploadFile = new UploadFile();
+        System.out.println("fileupload start");
+        List<UploadFile> uploadFileList = new ArrayList<UploadFile>();
+        try {
+            String modifileName = UUID.randomUUID().toString();
+            String baseDir = "D:/intelij/spring/LDGBootGradle/uploads";
+            String filePath = baseDir + "/" + modifileName;
+            files.transferTo(new File(filePath));
+            Long size = files.getSize();
+            String fileType = files.getContentType();
+            String fileName = files.getOriginalFilename();
+
+            System.out.println(modifileName);
+            System.out.println(filePath);
+            System.out.println(fileName);
+            System.out.println(size);
+            System.out.println(fileType);
+            System.out.println("uploadFile setting start");
+
+            uploadFile.setFileName(fileName);
+            uploadFile.setFileDownloadUri(filePath);
+            uploadFile.setFileType(fileType);
+            uploadFile.setSize(size);
+
+            fileService.save(uploadFile);
+
+            uploadFileList = fileRepository.findAll();
+            return uploadFileList;
+        } catch(Exception e) {
+            e.printStackTrace();
+            return uploadFileList;
+        }
     }
 }
