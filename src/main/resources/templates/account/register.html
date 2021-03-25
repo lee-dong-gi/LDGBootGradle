@@ -1,7 +1,7 @@
 <!doctype html>
 <html xmlns:th="http://www.thymeleaf.org">
 
-<head>
+<head th:replace="fragments/urbancommon :: head('Hello Sparrow')">
   <!-- Required meta tags -->
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -9,13 +9,14 @@
   <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
 
-  <title>Login</title>
+  <title>register</title>
 
   <!-- Custom styles for this template -->
   <link th:href="@{/css/signin.css}" rel="stylesheet">
 </head>
 
 <body class="text-center">
+  <div th:replace="fragments/urbancommon :: top('login')"></div>
   <main class="form-signin">
     <form th:action="@{/account/register}" method="post"><!-- th: 를 붙여줘야 csrf토큰이 같이 전송됨-->
       <a th:href="@{/}">
@@ -35,6 +36,102 @@
       <p class="mt-5 mb-3 text-muted">&copy; 2017–2021</p>
     </form>
   </main>
+    <hr />
+    <!-- Form -->
+    <h3>Form</h3>
+    <div id="main">
+			<section class="wrapper style1">
+				<div class="inner">
+          <form method="post" action="#">
+            <div class="row uniform">
+              <div class="6u 12u$(xsmall)">
+                <input type="text" name="name" id="name" value="" placeholder="Name" />
+              </div>
+              <div class="6u$ 12u$(xsmall)">
+                <input type="email" name="email" id="email" value="" placeholder="Email" />
+              </div>
+              <!-- Break -->
+              <div class="12u$">
+                <div class="select-wrapper">
+                  <select name="category" id="category">
+                    <option value="">- Category -</option>
+                    <option value="1">Manufacturing</option>
+                    <option value="1">Shipping</option>
+                    <option value="1">Administration</option>
+                    <option value="1">Human Resources</option>
+                  </select>
+                </div>
+              </div>
+              <!-- Break -->
+              <div class="4u 12u$(small)">
+                <input type="radio" id="priority-low" name="priority" checked>
+                <label for="priority-low">Low Priority</label>
+              </div>
+              <div class="4u 12u$(small)">
+                <input type="radio" id="priority-normal" name="priority">
+                <label for="priority-normal">Normal Priority</label>
+              </div>
+              <div class="4u$ 12u$(small)">
+                <input type="radio" id="priority-high" name="priority">
+                <label for="priority-high">High Priority</label>
+              </div>
+              <!-- Break -->
+              <div class="6u 12u$(small)">
+                <input type="checkbox" id="copy" name="copy">
+                <label for="copy">Email me a copy of this message</label>
+              </div>
+              <div class="6u$ 12u$(small)">
+                <input type="checkbox" id="human" name="human" checked>
+                <label for="human">I am a human and not a robot</label>
+              </div>
+              <!-- Break -->
+              <div class="12u$">
+                <textarea name="message" id="message" placeholder="Enter your message" rows="6"></textarea>
+              </div>
+              <!-- Break -->
+              <div class="12u$">
+                <ul class="actions">
+                  <li><input type="submit" value="Send Message" /></li>
+                  <li><input type="reset" value="Reset" class="alt" /></li>
+                </ul>
+              </div>
+            </div>
+          </form>
+      </div>
+    </section>
+  </div>
+      <hr />
+  <div id="main">
+    <section class="wrapper style1">
+      <div class="inner">
+        <div class="align-center">
+          <div class="row uniform">
+            <div class="6u 12u$(xsmall)">
+              <h1 class="h3 mb-3 fw-normal"><strong>Register</strong></h1>
+              <form th:action="@{/account/login}" method="post"><!-- th: 를 붙여줘야 csrf토큰이 같이 전송됨-->
+                <div th:if="${param.error}" class="alert alert-danger" role="alert">
+                    Invalid username and password.
+                </div>
+                <div th:if="${param.logout}" class="alert alert-primary" role="alert">
+                    You have been logged out.
+                </div>
+                <input type="text" id="username" name="username" class="form-control" placeholder="Username" required autofocus>
+                <label for="inputPassword" class="visually-hidden">Password</label>
+                <input type="password" id="inputPassword" name="password" class="form-control" placeholder="Password" required>
+                <button class="my-3 w-100 btn btn-lg btn-primary" type="submit">Sign in</button>
+              </form>
+            </div>
+            <div class="6u 12u$(xsmall)">
+              <div class="image fit">
+                <a href="generic.html" class="link"><img th:src="@{/images/building.jpg}" src="images/building.jpg" alt="building" /></a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+    <footer id="footer" th:replace="fragments/footer :: footer('footer')"></footer>
 </body>
 
 </html>

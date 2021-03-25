@@ -41,6 +41,7 @@
                   <td><a th:text="${board.title}" th:href="@{/board/view(id=${board.id})}">Otto</a></td>
                   <td th:text="${board.user.username}">홍길동</td>
                   <td th:text="${board.createdDate}">홍길동</td>
+                  <td th:text="${board.createdDate}">홍길동</td>
                 </tr>
               </tbody>
             </table>
@@ -59,7 +60,7 @@
             </nav>
           </div>
           <div class="text-end">
-            <a type="button" class="btn btn-primary" th:href="@{/board/form}">write</a>
+            <a type="button" class="button alt" th:href="@{/board/form}">write</a>
           </div>
         </div>
       </section>

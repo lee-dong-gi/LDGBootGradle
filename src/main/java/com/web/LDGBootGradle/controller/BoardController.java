@@ -1,10 +1,13 @@
 package com.web.LDGBootGradle.controller;
 
 import com.web.LDGBootGradle.model.Board;
+import com.web.LDGBootGradle.model.Comment;
 import com.web.LDGBootGradle.model.UploadFile;
 import com.web.LDGBootGradle.repository.BoardRepository;
+import com.web.LDGBootGradle.repository.CommentRepository;
 import com.web.LDGBootGradle.repository.FileRepository;
 import com.web.LDGBootGradle.service.BoardService;
+import com.web.LDGBootGradle.service.CommentService;
 import com.web.LDGBootGradle.service.FileService;
 import com.web.LDGBootGradle.validator.BoardValidator;
 
@@ -15,6 +18,7 @@ import org.springframework.data.web.PageableDefault;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -47,81 +51,93 @@ public class BoardController {
     @Autowired
     private FileService fileService;
 
+    @Autowired
+    private CommentRepository commentRepository;
+
+    @Autowired
+    private CommentService commentService;
+
     private Board board;
 
     @GetMapping("/list")
-    public String list(Model model,@PageableDefault(size = 10) Pageable pageable,
-                       @RequestParam(required = false, defaultValue = "") String searchText){
+    public String list(Model model, @PageableDefault(size = 10) Pageable pageable,
+                       @RequestParam(required = false, defaultValue = "") String searchText) {
         // Page<Board> boards = boardRepository.findAll(pageable);
         Page<Board> boards = boardRepository.findByTitleContainingOrContentContainingOrderByIdDesc(searchText, searchText, pageable);
         //=========================numbering===========================================================================
         int num = 0, result = 0, pagesize = 10;
-        int totalElements = (int)boards.getTotalElements()+1;
-        int nowpage = pageable.getPageNumber()+1;
-        System.out.println("nowpage :: "+nowpage);
-        System.out.println("totalElements :: "+(totalElements-1));
-        for (Board temp : boards){
+        int totalElements = (int) boards.getTotalElements() + 1;
+        int nowpage = pageable.getPageNumber() + 1;
+        System.out.println("nowpage :: " + nowpage);
+        System.out.println("totalElements :: " + (totalElements - 1));
+        for (Board temp : boards) {
             num++;
-            if (nowpage==1){
-                result=totalElements-num;
-            }else{
-                result = totalElements-(((nowpage*pagesize)-pagesize)+num);
+            if (nowpage == 1) {
+                result = totalElements - num;
+            } else {
+                result = totalElements - (((nowpage * pagesize) - pagesize) + num);
             }
             temp.setNum(result);
         }
         //====================================================================================================
-        int startPage = Math.max(1 , boards.getPageable().getPageNumber() - 4);
-        int endPage = Math.min(boards.getTotalPages() , boards.getPageable().getPageNumber() + 4);
-        model.addAttribute("startPage",startPage);
-        model.addAttribute("endPage",endPage);
-        model.addAttribute("boards",boards);
+        int startPage = Math.max(1, boards.getPageable().getPageNumber() - 4);
+        int endPage = Math.min(boards.getTotalPages(), boards.getPageable().getPageNumber() + 4);
+        model.addAttribute("startPage", startPage);
+        model.addAttribute("endPage", endPage);
+        model.addAttribute("boards", boards);
         return "board/list";
     }
 
     @GetMapping("/view")
-    public String view(Model model, @RequestParam(required = false) Long id, HttpServletRequest request){
-        if(id==null) {
+    public String view(Model model, @RequestParam(required = false) Long id, HttpServletRequest request) {
+        if (id == null) {
             model.addAttribute("board", new Board());
-        }else{
+        } else {
             Board board = boardRepository.findById(id).orElse(null);
             model.addAttribute("board", board);
-            if (!("").equals(board.getUploadFileId()) & board.getUploadFileId()!=null){
-                String basicpath = request.getRequestURL().toString().replace(request.getRequestURI(),"");
+            if (!("").equals(board.getUploadFileId()) & board.getUploadFileId() != null) {
+                String basicpath = request.getRequestURL().toString().replace(request.getRequestURI(), "");
                 String filepath = basicpath + "/download/board/" + board.getUploadFileId();
 
                 UploadFile uploadFile = fileService.getFile(board.getUploadFileId());
                 String imagepath = "/download/show/";
-                String fileDownLoadUri =  uploadFile.getFileDownloadUri();
+                String fileDownLoadUri = uploadFile.getFileDownloadUri();
                 String fileType = uploadFile.getFileType();
 
                 imagepath = imagepath + uploadFile.getUploadFileId();
-                System.out.println("imagepath ::::: "+imagepath);
+                System.out.println("imagepath ::::: " + imagepath);
 
-                model.addAttribute("filepath",filepath);
-                model.addAttribute("imagepath",imagepath);
-                model.addAttribute("filename",uploadFile.getFileName());
-            }else{
-                model.addAttribute("imagepath","/images/noimage.jpg");
+                model.addAttribute("filepath", filepath);
+                model.addAttribute("imagepath", imagepath);
+                model.addAttribute("filename", uploadFile.getFileName());
+            } else {
+                model.addAttribute("imagepath", "/images/noimage.jpg");
             }
+
+            List<Comment> comments = commentRepository.findByBoardId(id);
+            if (!comments.isEmpty()){
+                model.addAttribute("comments", comments);
+            }
+
         }
         return "board/view";
     }
 
     @GetMapping("/form")
-    public String form(Model model, @RequestParam(required = false) Long id, HttpServletRequest request){
-        if(id==null) {
+    public String form(Model model, @RequestParam(required = false) Long id, HttpServletRequest request) {
+        if (id == null) {
             model.addAttribute("board", new Board());
-        }else{
+        } else {
             String imagepath = "/uploads/";
             Board board = boardRepository.findById(id).orElse(null);
             model.addAttribute("board", board);
             System.out.println(board.getUploadFileId());
-            if (!("").equals(board.getUploadFileId()) & board.getUploadFileId()!=null){
-                String basicpath = request.getRequestURL().toString().replace(request.getRequestURI(),"");
+            if (!("").equals(board.getUploadFileId()) & board.getUploadFileId() != null) {
+                String basicpath = request.getRequestURL().toString().replace(request.getRequestURI(), "");
                 String filepath = basicpath + "/download/board/" + board.getUploadFileId();
 
                 UploadFile uploadFile = fileService.getFile(board.getUploadFileId());
-                String fileDownLoadUri =  uploadFile.getFileDownloadUri();
+                String fileDownLoadUri = uploadFile.getFileDownloadUri();
                 String fileType = uploadFile.getFileType();
 
                 String[] strarr;
@@ -130,14 +146,14 @@ public class BoardController {
 
                 imagepath = imagepath + fileDownLoadUri;
 
-                System.out.println("imagepath ::::: "+imagepath);
+                System.out.println("imagepath ::::: " + imagepath);
 
-                model.addAttribute("filepath",filepath);
-                model.addAttribute("imagepath",imagepath);
-                model.addAttribute("filename",uploadFile.getFileName());
-            }else{
+                model.addAttribute("filepath", filepath);
+                model.addAttribute("imagepath", imagepath);
+                model.addAttribute("filename", uploadFile.getFileName());
+            } else {
                 imagepath = "";
-                model.addAttribute("imagepath",imagepath);
+                model.addAttribute("imagepath", imagepath);
             }
         }
 
@@ -145,7 +161,7 @@ public class BoardController {
     }
 
     @PostMapping("/form")
-    public String postform(@Valid Board board, BindingResult result, Authentication authentication, @RequestParam(value = "uploadFile",required = false) MultipartFile files) {
+    public String postform(@Valid Board board, BindingResult result, Authentication authentication, @RequestParam(value = "uploadFile", required = false) MultipartFile files) {
 
         System.out.println(result.toString());
         boardValidator.validate(board, result);
@@ -155,18 +171,18 @@ public class BoardController {
             return "board/form";
         }
 
-        if (files!=null){
+        if (files != null) {
             System.out.println("files :::::::::" + files.toString());
             List<UploadFile> UploadFileId = fileupload(files);
-            int listsize = UploadFileId.size()-1;
-            if (listsize < 0 || UploadFileId.isEmpty()){
+            int listsize = UploadFileId.size() - 1;
+            if (listsize < 0 || UploadFileId.isEmpty()) {
                 board.setUploadFileId(UploadFileId.get(0).getUploadFileId());
-            }else {
+            } else {
                 board.setUploadFileId(UploadFileId.get(listsize).getUploadFileId());
             }
         }
 
-        String username= authentication.getName();
+        String username = authentication.getName();
         boardService.save(username, board);
 
         //boardRepository.save(board);
@@ -174,7 +190,7 @@ public class BoardController {
     }
 
     //파일 업로드
-    List<UploadFile> fileupload(MultipartFile files){
+    List<UploadFile> fileupload(MultipartFile files) {
         UploadFile uploadFile = new UploadFile();
         System.out.println("fileupload start");
         List<UploadFile> uploadFileList = new ArrayList<UploadFile>();
@@ -191,13 +207,13 @@ public class BoardController {
             String extention;
             fileTypeArr = fileType.split("/");
 
-            if(fileTypeArr[1].equals("jpeg")){
+            if (fileTypeArr[1].equals("jpeg")) {
                 extention = "jpg";
-            }else{
+            } else {
                 extention = fileTypeArr[1];
             }
 
-            String modifileName = UUID.randomUUID().toString() + "." +extention;
+            String modifileName = UUID.randomUUID().toString() + "." + extention;
 
             String filePath = baseDir + "/" + modifileName;
 
@@ -219,11 +235,29 @@ public class BoardController {
 
             uploadFileList = fileRepository.findAll();
             return uploadFileList;
-        } catch(Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return uploadFileList;
         }
     }
 
+    @PostMapping("/commentform")
+    public String commentform(@Valid Comment comment, BindingResult result, Authentication authentication) {
+        String username= authentication.getName();
+        commentService.save(username,comment);
+        Long boardId = comment.getBoardId();
+        return "redirect:/board/view?id=" + boardId;
+    }
 
+    @PostMapping("/delete/{id}")
+    public String delete(@PathVariable("id") Long id) {
+        boardService.deleteBoard(id);
+        return "redirect:/board/list";
+    }
+
+    @PostMapping("/commetdelete/{id}")
+    public String commentdelete(@PathVariable("id") Long id,Long boardId) {
+        commentService.deleteComment(id);
+        return "redirect:/board/view?id=" + boardId;
+    }
 }

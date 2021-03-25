@@ -46,9 +46,30 @@
             <span class="image fit"><img id="images" src="images/pic01.jpg" th:src="${imagepath}" alt=""></span>
           </div>
           <div class="text-end">
-            <a th:href="@{/board/form(id=${board.id})}" class="btn btn-primary small" ><strong>Modify</strong></a>
-            <a th:href="@{/board/list}" class="btn btn-primary small"><strong>list</strong></a>
+            <a th:href="@{/board/form(id=${board.id})}" class="button alt small" ><strong>Modify</strong></a>
+            <form th:action="@{/board/delete/}+${board.id}" action="#" method="POST" style="display: inline-block;">
+              <button type="submit" class="button alt small">Delete</button>
+            </form>
+            <a th:href="@{/board/list}" class="button alt small"><strong>list</strong></a>
           </div>
+        </div>
+        </br>
+        <label for="comment">comment</label>
+        <div class="12u$">
+          <form action="#" th:action="@{/board/commentform}" th:object="${board}" method="post">
+            <input type="hidden" name="boardId" th:value="*{id}">
+            <textarea name="commentContent" id="commentContent" placeholder="Enter your comment" rows="6"></textarea>
+            <div class="text-end my-1">
+              <button type="submit" class="button alt small">write</button>
+            </div>
+          </form>
+				</div>
+        <div class="12u$" th:each="comment : ${comments}">
+          <p th:text="${comment.commentContent}"></p>
+          <form th:action="@{/board/commetdelete/}+${comment.commentId}" action="#" method="POST" style="display: inline-block;">
+            <input type="hidden" name="boardId" th:value="*{id}">
+            <button type="submit" class="button alt small">Delete</button>
+          </form>
         </div>
       </div>
     </section>
