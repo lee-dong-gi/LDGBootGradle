@@ -2,6 +2,7 @@ package com.web.LDGBootGradle.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
+import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -29,11 +30,13 @@ public class Board {
     private User user;
 
     @CreatedDate
-    @Column(updatable = false) //업데이트 할때마다 같이 업데이트 됨 해결필요
+    @Column(updatable = false) //업데이트 할때마다 같이 업데이트 됨 해결필요(조회수도)
     private LocalDateTime createdDate;
 
     @LastModifiedDate
     private LocalDateTime modifiedDate;
+
+    private Long views;
 
     @Transient
     private int num;

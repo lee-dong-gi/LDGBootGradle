@@ -26,7 +26,9 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.io.File;
 
@@ -93,14 +95,27 @@ public class BoardController {
         return "board/list";
     }
 
-
     @GetMapping("/view")
-    public String view(Model model, @RequestParam(required = false) Long id, HttpServletRequest request) {
+    public String view(Model model, @RequestParam(required = false) Long id, HttpServletRequest request,
+                        HttpServletResponse response) {
         if (id == null) {
             model.addAttribute("board", new Board());
         } else {
             Board board = boardRepository.findById(id).orElse(null);
+
+            //조회수 =======================================================
+            int flag = setview(request, board.getId(),response);
+            if (flag == 0){
+                Long views = board.getViews();
+                views = views + 1;
+                board.setViews(views);
+                boardRepository.save(board);
+            }
+            //=======================================================
+
             model.addAttribute("board", board);
+
+            //첨부파일
             if (!("").equals(board.getUploadFileId()) & board.getUploadFileId() != null) {
                 String basicpath = request.getRequestURL().toString().replace(request.getRequestURI(), "");
                 String filepath = basicpath + "/download/board/" + board.getUploadFileId();
@@ -120,6 +135,7 @@ public class BoardController {
                 model.addAttribute("imagepath", "/images/noimage.jpg");
             }
 
+            // 댓글
             List<Comment> comments = commentRepository.findByBoardId(id);
             if (!comments.isEmpty()){
                 User commentUser;
@@ -271,4 +287,70 @@ public class BoardController {
         commentService.deleteComment(id);
         return "redirect:/board/view?id=" + boardId;
     }
+
+    //boardViews쿠키가 있을때
+    private void setCookies(HttpServletRequest request, Long boardnum, HttpServletResponse response, Cookie[] cookies){
+        System.out.println("start setCookies");
+        String temp = "";
+        for (Cookie cookie : cookies){
+            if(cookie.getName().equals("boardViews")){ // boardViews라는 이름의 쿠키가 있으면 값을 갱신함
+                temp = cookie.getValue();
+            }
+        }
+        temp = temp + "/" + boardnum.toString();
+        Cookie myCookie = new Cookie("boardViews", temp);
+        myCookie.setMaxAge(10000000); // 쿠키의 expiration 타임을 0으로 하여 없앤다.
+        myCookie.setPath("/"); // 모든 경로에서 삭제 됬음을 알린다.
+        response.addCookie(myCookie);
+        System.out.println("setCookies ::: " + myCookie.toString());
+    }
+
+    //쿠키가 아예없으면
+    private void initCookies (HttpServletRequest request, Long boardnum, HttpServletResponse response){
+        System.out.println("start initCookies");
+        Cookie myCookie = new Cookie("boardViews", boardnum.toString());
+        myCookie.setMaxAge(10000000); // 쿠키의 expiration 타임을 0으로 하여 없앤다.
+        myCookie.setPath("/"); // 모든 경로에서 삭제 됬음을 알린다.
+        response.addCookie(myCookie);
+        System.out.println("initCookies ::: " + myCookie.toString());
+    }
+    
+    //특정 게시글 조회이력 확인 및 쿠키세팅
+    private int setview(HttpServletRequest request, Long boardnum, HttpServletResponse response){
+        int flag = 0; //0이면 조회한적 없음, 1이면 조회한적있음
+        int initflag = 0; // 0이면 boardViews쿠키 있음, 1이면 boardViews쿠키 없음
+        Cookie[] myCookies = request.getCookies();
+        if (!myCookies.equals(null) || (myCookies.length)!=0){
+            for (Cookie myCookie : myCookies){
+                System.out.println("myCookie.getName() ::: " + myCookie.getName());
+                System.out.println("myCookie.getValue() ::: " + myCookie.getValue());
+                if(myCookie.getName().equals("boardViews")){
+                    initflag=1;
+                    String[] tempBoardNums = myCookie.getValue().split("/");
+                    for(String tempBoardNum : tempBoardNums){
+                        System.out.println("tempBoardNum ::: " + tempBoardNum);
+                        if (tempBoardNum.equals(boardnum.toString())){
+                            System.out.println("중복체크 걸림");
+                            flag = 1;
+                            return flag;
+                        }
+                    }
+                }
+            }
+            if (flag==0 & initflag==1){ setCookies(request, boardnum, response, myCookies);
+                System.out.println("flag ::: " + flag);
+                return flag;
+            }
+            else{
+                initCookies(request, boardnum, response);
+                System.out.println("flag ::: " + flag);
+                return flag;
+            }
+        }else{
+            initCookies(request, boardnum, response);
+            return flag;
+        }
+    }
+
+
 }

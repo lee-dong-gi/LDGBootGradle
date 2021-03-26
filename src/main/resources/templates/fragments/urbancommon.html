@@ -39,13 +39,14 @@
         <button class="mx-1 button special small" type="submit" sec:authorize="isAuthenticated()"><i class="fas fa-sign-out-alt">Logout</i></button>
       </form>
       <a href="#menu" class="mx-1 button special small">Menu</a>
+      <br/>
     </header>
 
     <!-- Nav -->
     <nav id="menu">
       <ul class="links">
         <li><a th:href="@{/urban}" href="index.html">Home</a></li>
-        <li><a href="#" th:href="@{/board/list}" th:classappend="${menu} == 'board' ? 'active'">Notice</a></li>
+        <li><a href="#" th:href="@{/board/list}">Post</a></li>
         <li><a th:href="@{/elements.html}" href="elements.html">Chat</a></li>
       </ul>
     </nav>

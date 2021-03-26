@@ -1,7 +1,7 @@
 <!doctype html>
 <html xmlns:th="http://www.thymeleaf.org">
 
-<head th:replace="fragments/urbancommon :: head('Notice')">
+<head th:replace="fragments/urbancommon :: head('Post')">
   <!-- Required meta tags -->
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -19,12 +19,18 @@
 </head>
 
 <body>
-  <div th:replace="fragments/urbancommon :: top('board')"></div>
+  <div th:replace="fragments/urbancommon :: top('Post')"></div>
 
   <div id="main">
     <section class="wrapper style1">
       <div class="inner" th:object="${board}">
-        <h2>Notice</h2>
+        <br/>
+        <h2>Post</h2>
+        <div class="text-end">
+          <span th:text="*{user.username}"></span> &nbsp; | &nbsp;
+          <span th:text="*{#temporals.format(createdDate, 'yyyy-MM-dd HH:mm')}"></span> &nbsp; | &nbsp;
+          <span th:text="*{views}"></span>
+        </div>
         <hr />
         <div class="row 200%">
           <div class="6u 12u$(medium)">

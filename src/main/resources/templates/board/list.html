@@ -17,22 +17,23 @@
 </head>
 
 <body>
-  <div th:replace="fragments/urbancommon :: top('board')"></div>
+  <div th:replace="fragments/urbancommon :: top('Post')"></div>
   <!-- Main -->
   <div id="main">
     <section class="wrapper style1">
       <div class="inner">
         <!-- Table -->
-          <h2>Notice</h2>
+          <h2>Post</h2>
           <h4><div>TOTAL : <span th:text="${boards.totalElements}"></span></div></h4>
           <div class="table-wrapper">
             <table>
               <thead>
                 <tr>
                   <th scope="col">No</th>
-                  <th scope="col">Title</th>
+                  <th scope="col" style="width:40%;">Title</th>
                   <th scope="col">Writer</th>
                   <th scope="col">WriteDate</th>
+                  <th scope="col" style="width:10%;">Views</th>
                 </tr>
               </thead>
               <tbody>
@@ -41,6 +42,7 @@
                   <td><a th:text="${board.title}" th:href="@{/board/view(id=${board.id})}">Otto</a></td>
                   <td th:text="${board.user.username}">홍길동</td>
                   <td th:text="${#temporals.format(board.createdDate, 'yyyy-MM-dd HH:mm')}">홍길동</td>
+                  <td th:text="${board.views}">1</td>
                 </tr>
               </tbody>
             </table>
