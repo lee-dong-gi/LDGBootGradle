@@ -45,12 +45,12 @@
           <div class="6u 12u$(medium)">
             <span class="image fit"><img id="images" src="images/pic01.jpg" th:src="${imagepath}" alt=""></span>
           </div>
-          <div class="text-end">
-            <a th:href="@{/board/form(id=${board.id})}" class="button alt small" ><strong>Modify</strong></a>
+          <div class="text-end" >
+            <a th:href="@{/board/list}" class="button alt" style="display: inline-block; float: left;">list</a>
+            <a th:href="@{/board/form(id=${board.id})}" class="button alt" ><strong>Modify</strong></a>
             <form th:action="@{/board/delete/}+${board.id}" action="#" method="POST" style="display: inline-block;">
-              <button type="submit" class="button alt small">Delete</button>
+              <button type="submit" class="button alt">Delete</button>
             </form>
-            <a th:href="@{/board/list}" class="button alt small"><strong>list</strong></a>
           </div>
         </div>
         </br>
@@ -64,12 +64,15 @@
             </div>
           </form>
 				</div>
+        <hr>
         <div class="12u$" th:each="comment : ${comments}">
+          <span class="image left"><i class="fas fa-user-alt"></i></span><strong><p th:text="${comment.username}">Lorem </p></strong>
           <p th:text="${comment.commentContent}"></p>
-          <form th:action="@{/board/commetdelete/}+${comment.commentId}" action="#" method="POST" style="display: inline-block;">
-            <input type="hidden" name="boardId" th:value="*{id}">
+          <form th:action="@{/board/commetdelete/}+${comment.commentId}" action="#" method="POST" style="float: right; transform: translate(-75px, -45px);">
             <button type="submit" class="button alt small">Delete</button>
+            <input type="hidden" name="boardId" th:value="*{id}">
           </form>
+          <hr>
         </div>
       </div>
     </section>

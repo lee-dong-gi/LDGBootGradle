@@ -3,12 +3,14 @@ package com.web.LDGBootGradle.controller;
 import com.web.LDGBootGradle.model.Board;
 import com.web.LDGBootGradle.model.Comment;
 import com.web.LDGBootGradle.model.UploadFile;
+import com.web.LDGBootGradle.model.User;
 import com.web.LDGBootGradle.repository.BoardRepository;
 import com.web.LDGBootGradle.repository.CommentRepository;
 import com.web.LDGBootGradle.repository.FileRepository;
 import com.web.LDGBootGradle.service.BoardService;
 import com.web.LDGBootGradle.service.CommentService;
 import com.web.LDGBootGradle.service.FileService;
+import com.web.LDGBootGradle.service.UserService;
 import com.web.LDGBootGradle.validator.BoardValidator;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,6 +59,9 @@ public class BoardController {
     @Autowired
     private CommentService commentService;
 
+    @Autowired
+    private UserService userService;
+
     private Board board;
 
     @GetMapping("/list")
@@ -88,6 +93,7 @@ public class BoardController {
         return "board/list";
     }
 
+
     @GetMapping("/view")
     public String view(Model model, @RequestParam(required = false) Long id, HttpServletRequest request) {
         if (id == null) {
@@ -116,6 +122,11 @@ public class BoardController {
 
             List<Comment> comments = commentRepository.findByBoardId(id);
             if (!comments.isEmpty()){
+                User commentUser;
+                for (Comment com : comments){
+                    commentUser = userService.findById(com.getUserId()).orElse(null);
+                    com.setUsername(commentUser.getUsername());
+                }
                 model.addAttribute("comments", comments);
             }
 

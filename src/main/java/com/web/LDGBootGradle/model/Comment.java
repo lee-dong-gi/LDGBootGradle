@@ -7,6 +7,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Entity
@@ -31,4 +32,7 @@ public class Comment {
 
     @Column(nullable = false)
     private Long boardId;
+
+    @Transient
+    private String username;
 }
