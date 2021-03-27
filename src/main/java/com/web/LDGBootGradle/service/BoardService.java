@@ -28,4 +28,7 @@ public class BoardService {
     public void deleteBoard(Long id) {
         boardRepository.deleteById(id);
     }
+
+    public Long findByNextObj(Long id){ return boardRepository.findByNextObj(id); }
+    public Long findByPrevObj(Long id){ return boardRepository.findByPrevObj(id); }
 }

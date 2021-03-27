@@ -66,6 +66,7 @@ public class BoardController {
 
     private Board board;
 
+    //  게시판 리스트
     @GetMapping("/list")
     public String list(Model model, @PageableDefault(size = 10) Pageable pageable,
                        @RequestParam(required = false, defaultValue = "") String searchText) {
@@ -95,70 +96,102 @@ public class BoardController {
         return "board/list";
     }
 
+    // 게시글 보기
     @GetMapping("/view")
     public String view(Model model, @RequestParam(required = false) Long id, HttpServletRequest request,
-                        HttpServletResponse response) {
-        if (id == null) {
-            model.addAttribute("board", new Board());
-        } else {
-            Board board = boardRepository.findById(id).orElse(null);
+                        HttpServletResponse response, Authentication authentication) {
+        Board board = boardRepository.findById(id).orElse(null);
 
-            //조회수 =======================================================
-            int flag = setview(request, board.getId(),response);
-            if (flag == 0){
-                Long views = board.getViews();
-                views = views + 1;
-                board.setViews(views);
-                boardRepository.save(board);
-            }
-            //=======================================================
-
-            model.addAttribute("board", board);
-
-            //첨부파일
-            if (!("").equals(board.getUploadFileId()) & board.getUploadFileId() != null) {
-                String basicpath = request.getRequestURL().toString().replace(request.getRequestURI(), "");
-                String filepath = basicpath + "/download/board/" + board.getUploadFileId();
-
-                UploadFile uploadFile = fileService.getFile(board.getUploadFileId());
-                String imagepath = "/download/show/";
-                String fileDownLoadUri = uploadFile.getFileDownloadUri();
-                String fileType = uploadFile.getFileType();
-
-                imagepath = imagepath + uploadFile.getUploadFileId();
-                System.out.println("imagepath ::::: " + imagepath);
-
-                model.addAttribute("filepath", filepath);
-                model.addAttribute("imagepath", imagepath);
-                model.addAttribute("filename", uploadFile.getFileName());
-            } else {
-                model.addAttribute("imagepath", "/images/noimage.jpg");
-            }
-
-            // 댓글
-            List<Comment> comments = commentRepository.findByBoardId(id);
-            if (!comments.isEmpty()){
-                User commentUser;
-                for (Comment com : comments){
-                    commentUser = userService.findById(com.getUserId()).orElse(null);
-                    com.setUsername(commentUser.getUsername());
-                }
-                model.addAttribute("comments", comments);
-            }
-
+        // 게시판 수정, 삭제 시 이용자 본인여부 체크
+        String selfcheck = "N";
+        if (checkUser(authentication,board)){
+            selfcheck =  "Y";
         }
+        model.addAttribute("selfcheck",selfcheck);
+
+        //조회수 =======================================================
+        int flag = setview(request, board.getId(),response); //0이면 조회한적 없음, 1이면 조회한적 있음
+        if (flag == 0){
+            Long views = board.getViews();
+            views = views + 1;
+            board.setViews(views);
+            boardRepository.save(board);
+        }
+        //=======================================================
+
+        model.addAttribute("board", board);
+
+        //첨부파일
+        if (!("").equals(board.getUploadFileId()) & board.getUploadFileId() != null) {
+            String basicpath = request.getRequestURL().toString().replace(request.getRequestURI(), "");
+            String filepath = basicpath + "/download/board/" + board.getUploadFileId();
+
+            UploadFile uploadFile = fileService.getFile(board.getUploadFileId());
+            String imagepath = "/download/show/";
+            String fileDownLoadUri = uploadFile.getFileDownloadUri();
+            String fileType = uploadFile.getFileType();
+
+            imagepath = imagepath + uploadFile.getUploadFileId();
+            System.out.println("imagepath ::::: " + imagepath);
+
+            model.addAttribute("filepath", filepath);
+            model.addAttribute("imagepath", imagepath);
+            model.addAttribute("filename", uploadFile.getFileName());
+        } else {
+            model.addAttribute("imagepath", "/images/noimage.jpg");
+        }
+
+        // 댓글
+        List<Comment> comments = commentRepository.findByBoardId(id);
+        if (!comments.isEmpty()){
+            User commentUser;
+            for (Comment com : comments){
+                commentUser = userService.findById(com.getUserId()).orElse(null);
+                com.setUsername(commentUser.getUsername());
+                if (checkUser(authentication,com)){
+                    com.setCommentselfcheck("Y");
+                }else{
+                    com.setCommentselfcheck("N");
+                }
+            }
+            model.addAttribute("comments", comments);
+        }
+        
+        //다음글 이전글 리스트
+        Long nextboardId = boardService.findByNextObj(id);
+        Board nextBoard = null;
+        Board prevBoard = null;
+        if (nextboardId!=null) {
+            nextBoard = boardRepository.findById(nextboardId).orElse(null);
+        }
+
+        Long prevboardId = boardService.findByPrevObj(id);
+        if (prevboardId!=null) {
+            prevBoard = boardRepository.findById(prevboardId).orElse(null);
+        }
+        
+        model.addAttribute("nextBoard",nextBoard);
+        model.addAttribute("prevBoard",prevBoard);
+        
         return "board/view";
     }
 
+    // 게시글쓰기 및 수정
     @GetMapping("/form")
-    public String form(Model model, @RequestParam(required = false) Long id, HttpServletRequest request) {
+    public String form(Model model, @RequestParam(required = false) Long id, HttpServletRequest request, Authentication authentication) {
         if (id == null) {
             model.addAttribute("board", new Board());
         } else {
             String imagepath = "/uploads/";
             Board board = boardRepository.findById(id).orElse(null);
+
+
+            // 이용자 체크
+            if (!checkUser(authentication,board)){
+                return "redirect:/board/list";
+            }
+
             model.addAttribute("board", board);
-            System.out.println(board.getUploadFileId());
             if (!("").equals(board.getUploadFileId()) & board.getUploadFileId() != null) {
                 String basicpath = request.getRequestURL().toString().replace(request.getRequestURI(), "");
                 String filepath = basicpath + "/download/board/" + board.getUploadFileId();
@@ -187,8 +220,14 @@ public class BoardController {
         return "board/form";
     }
 
+    // 게시글 작성
     @PostMapping("/form")
     public String postform(@Valid Board board, BindingResult result, Authentication authentication, @RequestParam(value = "uploadFile", required = false) MultipartFile files) {
+
+        // 이용자 체크
+        if (!checkUser(authentication,board)){
+            return "redirect:/board/list";
+        }
 
         System.out.println(result.toString());
         boardValidator.validate(board, result);
@@ -268,6 +307,7 @@ public class BoardController {
         }
     }
 
+    // 댓글쓰기
     @PostMapping("/commentform")
     public String commentform(@Valid Comment comment, BindingResult result, Authentication authentication) {
         String username= authentication.getName();
@@ -276,19 +316,34 @@ public class BoardController {
         return "redirect:/board/view?id=" + boardId;
     }
 
+    // 게시글 삭제
     @PostMapping("/delete/{id}")
-    public String delete(@PathVariable("id") Long id) {
+    public String delete(@PathVariable("id") Long id, Authentication authentication) {
+        Board board = boardRepository.findById(id).orElse(null);
+
+        // 이용자 체크
+        if (!checkUser(authentication,board)){
+            return "redirect:/board/list";
+        }
+
         boardService.deleteBoard(id);
         return "redirect:/board/list";
     }
 
+    // 댓글삭제
     @PostMapping("/commetdelete/{id}")
-    public String commentdelete(@PathVariable("id") Long id,Long boardId) {
+    public String commentdelete(@PathVariable("id") Long id,Long boardId, Authentication authentication) {
+        Comment comment = commentRepository.findById(id).orElse(null);
+        // 이용자 체크
+        if (!checkUser(authentication,comment)){
+            return "redirect:/board/list";
+        }
+
         commentService.deleteComment(id);
         return "redirect:/board/view?id=" + boardId;
     }
 
-    //boardViews쿠키가 있을때
+    // boardViews쿠키가 있을때
     private void setCookies(HttpServletRequest request, Long boardnum, HttpServletResponse response, Cookie[] cookies){
         System.out.println("start setCookies");
         String temp = "";
@@ -330,7 +385,7 @@ public class BoardController {
                     for(String tempBoardNum : tempBoardNums){
                         System.out.println("tempBoardNum ::: " + tempBoardNum);
                         if (tempBoardNum.equals(boardnum.toString())){
-                            System.out.println("중복체크 걸림");
+                            System.out.println("dupcheck!");
                             flag = 1;
                             return flag;
                         }
@@ -352,5 +407,29 @@ public class BoardController {
         }
     }
 
+    // 게시글 이용자 체크
+    private boolean checkUser(Authentication authentication, Board board){
+        boolean result = false;
+        String authUserName = authentication.getName();
+        String boardUserName = board.getUser().getUsername();
+        if (authUserName.equals(boardUserName)){
+            result = true;
+        }else{
+            result = false;
+        }
+        return result;
+    }
 
+    // 댓글 이용자 체크
+    private boolean checkUser(Authentication authentication, Comment comment){
+        boolean result = false;
+        String authUserName = authentication.getName();
+        String commentUserName = comment.getUsername();
+        if (authUserName.equals(commentUserName)){
+            result = true;
+        }else{
+            result = false;
+        }
+        return result;
+    }
 }

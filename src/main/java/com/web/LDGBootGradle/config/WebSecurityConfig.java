@@ -1,5 +1,6 @@
 package com.web.LDGBootGradle.config;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,6 +15,7 @@ import javax.sql.DataSource;
 
 @Configuration
 @EnableWebSecurity
+@Slf4j
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
@@ -24,7 +26,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         http
                 .csrf().disable()   //form을 submit할때 보내는 csrf토큰을 안보내도록 설정
             .authorizeRequests()
-                .antMatchers("/urban","/account/register","/css/**","/api/**","/js/**","/fonts/**","/images/**", "/post/**").permitAll()
+                .antMatchers("/urban","/account/register","/css/**","/api/**","/js/**","/fonts/**","/images/**").permitAll()
                 .antMatchers("/admin/**").access("ROLE_ADMIN")
                 .antMatchers("/urban", "/login", "/login-error").permitAll()
                 .anyRequest().authenticated()

@@ -35,4 +35,8 @@ public class Comment {
 
     @Transient
     private String username;
+    
+    //댓글 수정, 삭제 시 본인여부 확인 
+    @Transient
+    private String commentselfcheck;
 }
