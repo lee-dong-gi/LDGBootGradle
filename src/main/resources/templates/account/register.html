@@ -16,9 +16,68 @@
 </head>
 
 <body class="text-center">
+  <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+<script>
+    //다음 주소 API
+    function sample6_execDaumPostcode() {
+    new daum.Postcode({
+        oncomplete: function(data) {
+            // 팝업에서 검색결과 항목을 클릭했을때 실행할 코드를 작성하는 부분.
+
+            // 각 주소의 노출 규칙에 따라 주소를 조합한다.
+            // 내려오는 변수가 값이 없는 경우엔 공백('')값을 가지므로, 이를 참고하여 분기 한다.
+            var addr = ''; // 주소 변수
+            var extraAddr = ''; // 참고항목 변수
+
+            //사용자가 선택한 주소 타입에 따라 해당 주소 값을 가져온다.
+            if (data.userSelectedType === 'R') { // 사용자가 도로명 주소를 선택했을 경우
+                addr = data.roadAddress;
+            } else { // 사용자가 지번 주소를 선택했을 경우(J)
+                addr = data.jibunAddress;
+            }
+
+            // 사용자가 선택한 주소가 도로명 타입일때 참고항목을 조합한다.
+            if(data.userSelectedType === 'R'){
+                // 법정동명이 있을 경우 추가한다. (법정리는 제외)
+                // 법정동의 경우 마지막 문자가 "동/로/가"로 끝난다.
+                if(data.bname !== '' && /[동|로|가]$/g.test(data.bname)){
+                    extraAddr += data.bname;
+                }
+                // 건물명이 있고, 공동주택일 경우 추가한다.
+                if(data.buildingName !== '' && data.apartment === 'Y'){
+                    extraAddr += (extraAddr !== '' ? ', ' + data.buildingName : data.buildingName);
+                }
+                // 표시할 참고항목이 있을 경우, 괄호까지 추가한 최종 문자열을 만든다.
+                if(extraAddr !== ''){
+                    extraAddr = ' (' + extraAddr + ')';
+                }
+                // 조합된 참고항목을 해당 필드에 넣는다.
+                document.getElementById("sample6_extraAddress").value = extraAddr;
+
+            } else {
+                document.getElementById("sample6_extraAddress").value = '';
+            }
+
+            // 우편번호와 주소 정보를 해당 필드에 넣는다.
+            document.getElementById('sample6_postcode').value = data.zonecode;
+            document.getElementById("sample6_address").value = addr;
+            // 커서를 상세주소 필드로 이동한다.
+            document.getElementById("sample6_detailAddress").focus();
+        }
+    }).open();
+}
+</script>
+<!--
+<input type="text" name="postcode" id="sample6_postcode" placeholder="우편번호">
+<input type="button" onclick="sample6_execDaumPostcode()" value="우편번호 찾기"><br>
+<input type="text" name="address" id="sample6_address" placeholder="주소"><br>
+<input type="text" name="detailAddress" id="sample6_detailAddress" placeholder="상세주소">
+-->
+
+<!-- th:action 를 붙여줘야 csrf토큰이 같이 전송됨-->
   <div th:replace="fragments/urbancommon :: top('login')"></div>
-  <main class="form-signin">
-    <form th:action="@{/account/register}" method="post"><!-- th: 를 붙여줘야 csrf토큰이 같이 전송됨-->
+  <!--<main class="form-signin">
+    <form th:action="@{/account/register}" method="post">
       <a th:href="@{/}">
         <img class="mb-4" src="https://getbootstrap.com/docs/5.0/assets/brand/bootstrap-logo.svg" alt="" width="72" height="57">
       </a>
@@ -28,29 +87,70 @@
       <label for="inputPassword" class="visually-hidden">Password</label>
       <input type="password" id="inputPassword" name="password" class="form-control" placeholder="Password" required>
       <div class="checkbox mb-3">
-        <!--<label>
+        <label>
           <input type="checkbox" value="remember-me"> Remember me
-        </label-->
+        </label
       </div>
       <button class="w-100 btn btn-lg btn-primary" type="submit">회원가입</button>
       <p class="mt-5 mb-3 text-muted">&copy; 2017–2021</p>
     </form>
   </main>
-    <hr />
+-->
     <!-- Form -->
-    <h3>Form</h3>
     <div id="main">
 			<section class="wrapper style1">
 				<div class="inner">
-          <form method="post" action="#">
+          <h3>Sign Up</h3>
+
+          <hr/>
+
+          <form method="post" th:action="@{/account/register}" action="#">
+            <div class="row uniform">
+              <div class="10u 12u$(xsmall)">
+                <input type="text" name="name" id="name" value="" placeholder="Enter ID" />
+              </div>
+              <div class="2u 12u$(xsmall)">
+                <button>Dup check</button>
+              </div>
+              <div class="12u$(xsmall)">
+                <input type="text" name="password" id="password" value="" placeholder="Enter password" />
+              </div>
+              <div class="12u$(xsmall)">
+                <input type="text" name="passwordcheck" id="passwordcheck" value="" placeholder="Enter password confirm" />
+              </div>
+            </div>
+
+            <hr/>
+
+            <div class="row uniform">
+              <div class="10u 12u$(xsmall)">
+                <input type="text" name="postcode" id="sample6_postcode" placeholder="Zip code">
+              </div>
+              <div class="2u 12u$(xsmall)">
+                <input type="button" onclick="sample6_execDaumPostcode()" value="Find Zip Code"><br>
+              </div>
+              <div class="12u$(xsmall)">
+                <input type="text" name="address" id="sample6_address" placeholder="Address"><br>
+              </div>
+              <div class="6u 12u$(xsmall)">
+                <input type="text" name="extraAddress" id="sample6_extraAddress" placeholder="Reference">
+              </div>
+              <div class="6u 12u$(xsmall)">
+                <input type="text" name="detailAddress" id="sample6_detailAddress" placeholder="DetailAddress">
+              </div>
+            </div>
+
+            <br/>
+            <hr/>
+
             <div class="row uniform">
               <div class="6u 12u$(xsmall)">
-                <input type="text" name="name" id="name" value="" placeholder="Name" />
+                <input type="text" name="username" id="username" value="" placeholder="Enter Your Name" />
               </div>
               <div class="6u$ 12u$(xsmall)">
-                <input type="email" name="email" id="email" value="" placeholder="Email" />
+                <input type="email" name="email" id="email" value="" placeholder="Enter Your Email" />
               </div>
-              <!-- Break -->
+              <!--
               <div class="12u$">
                 <div class="select-wrapper">
                   <select name="category" id="category">
@@ -62,7 +162,7 @@
                   </select>
                 </div>
               </div>
-              <!-- Break -->
+
               <div class="4u 12u$(small)">
                 <input type="radio" id="priority-low" name="priority" checked>
                 <label for="priority-low">Low Priority</label>
@@ -75,7 +175,7 @@
                 <input type="radio" id="priority-high" name="priority">
                 <label for="priority-high">High Priority</label>
               </div>
-              <!-- Break -->
+
               <div class="6u 12u$(small)">
                 <input type="checkbox" id="copy" name="copy">
                 <label for="copy">Email me a copy of this message</label>
@@ -84,50 +184,22 @@
                 <input type="checkbox" id="human" name="human" checked>
                 <label for="human">I am a human and not a robot</label>
               </div>
-              <!-- Break -->
+              -->
               <div class="12u$">
-                <textarea name="message" id="message" placeholder="Enter your message" rows="6"></textarea>
+                <textarea name="introduction" id="introduction" placeholder="introduction" rows="4"></textarea>
+                <hr/>
               </div>
+
               <!-- Break -->
               <div class="12u$">
                 <ul class="actions">
-                  <li><input type="submit" value="Send Message" /></li>
+                  <li><input type="submit" value="Sign Up"/></li>
                   <li><input type="reset" value="Reset" class="alt" /></li>
+                  <li><a th:href="@{/urban}" class="button alt">Cancel</a></li>
                 </ul>
               </div>
             </div>
           </form>
-      </div>
-    </section>
-  </div>
-      <hr />
-  <div id="main">
-    <section class="wrapper style1">
-      <div class="inner">
-        <div class="align-center">
-          <div class="row uniform">
-            <div class="6u 12u$(xsmall)">
-              <h1 class="h3 mb-3 fw-normal"><strong>Register</strong></h1>
-              <form th:action="@{/account/login}" method="post"><!-- th: 를 붙여줘야 csrf토큰이 같이 전송됨-->
-                <div th:if="${param.error}" class="alert alert-danger" role="alert">
-                    Invalid username and password.
-                </div>
-                <div th:if="${param.logout}" class="alert alert-primary" role="alert">
-                    You have been logged out.
-                </div>
-                <input type="text" id="username" name="username" class="form-control" placeholder="Username" required autofocus>
-                <label for="inputPassword" class="visually-hidden">Password</label>
-                <input type="password" id="inputPassword" name="password" class="form-control" placeholder="Password" required>
-                <button class="my-3 w-100 btn btn-lg btn-primary" type="submit">Sign in</button>
-              </form>
-            </div>
-            <div class="6u 12u$(xsmall)">
-              <div class="image fit">
-                <a href="generic.html" class="link"><img th:src="@{/images/building.jpg}" src="images/building.jpg" alt="building" /></a>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </section>
   </div>

@@ -1,7 +1,7 @@
 <!doctype html>
 <html xmlns:th="http://www.thymeleaf.org">
 
-<head th:replace="fragments/urbancommon :: head('Notice')">
+<head th:replace="fragments/urbancommon :: head('Post')">
   <!-- Required meta tags -->
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -22,9 +22,11 @@
   <div id="main">
     <section class="wrapper style1">
       <div class="inner">
-        <h2>Notice</h2>
+        <h2>Post</h2>
         <form action="#" th:action="@{/board/form}" th:object="${board}" method="post" enctype="multipart/form-data">
           <input type="hidden" th:field="*{id}">
+          <input type="hidden" name="views" th:value="*{views}">
+          <input type="hidden" name="type" th:value="${type}">
           <div class="form-group my-5">
             <label for="title">Title</label>
             <input type="text" class="form-control" id="title" th:field="*{title}"

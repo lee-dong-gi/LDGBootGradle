@@ -1,10 +1,9 @@
 package com.web.LDGBootGradle.controller;
 
-import com.web.LDGBootGradle.model.Board;
-import com.web.LDGBootGradle.model.Comment;
-import com.web.LDGBootGradle.model.UploadFile;
-import com.web.LDGBootGradle.model.User;
+import com.google.gson.Gson;
+import com.web.LDGBootGradle.model.*;
 import com.web.LDGBootGradle.repository.BoardRepository;
+import com.web.LDGBootGradle.repository.BoardlikeRepository;
 import com.web.LDGBootGradle.repository.CommentRepository;
 import com.web.LDGBootGradle.repository.FileRepository;
 import com.web.LDGBootGradle.service.BoardService;
@@ -13,6 +12,8 @@ import com.web.LDGBootGradle.service.FileService;
 import com.web.LDGBootGradle.service.UserService;
 import com.web.LDGBootGradle.validator.BoardValidator;
 
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -32,9 +33,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.io.File;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Controller
 @RequestMapping("/board")
@@ -60,6 +59,9 @@ public class BoardController {
 
     @Autowired
     private CommentService commentService;
+
+    @Autowired
+    private BoardlikeRepository boardlikeRepository;
 
     @Autowired
     private UserService userService;
@@ -142,7 +144,7 @@ public class BoardController {
         }
 
         // 댓글
-        List<Comment> comments = commentRepository.findByBoardId(id);
+        List<Comment> comments = commentRepository.findByBoardIdOrderByCommentIdDesc(id);
         if (!comments.isEmpty()){
             User commentUser;
             for (Comment com : comments){
@@ -156,7 +158,12 @@ public class BoardController {
             }
             model.addAttribute("comments", comments);
         }
-        
+        // 좋아요 수
+        List<Boardlike> boardlikelist = boardlikeRepository.findByLikeContainingBoardId(id);
+        int boardlikenum = boardlikelist.size();
+        System.out.println("boardlikenum ::: " + boardlikenum);
+        board.setLike(boardlikenum);
+
         //다음글 이전글 리스트
         Long nextboardId = boardService.findByNextObj(id);
         Board nextBoard = null;
@@ -181,7 +188,9 @@ public class BoardController {
     public String form(Model model, @RequestParam(required = false) Long id, HttpServletRequest request, Authentication authentication) {
         if (id == null) {
             model.addAttribute("board", new Board());
+            model.addAttribute("type", "new");
         } else {
+            model.addAttribute("type", "modify");
             String imagepath = "/uploads/";
             Board board = boardRepository.findById(id).orElse(null);
 
@@ -222,21 +231,14 @@ public class BoardController {
 
     // 게시글 작성
     @PostMapping("/form")
-    public String postform(@Valid Board board, BindingResult result, Authentication authentication, @RequestParam(value = "uploadFile", required = false) MultipartFile files) {
-
-        // 이용자 체크
-        if (!checkUser(authentication,board)){
-            return "redirect:/board/list";
-        }
-
-        System.out.println(result.toString());
+    public String postform(@Valid Board board, BindingResult result, Authentication authentication,
+                           @RequestParam(value = "uploadFile", required = false) MultipartFile files,
+                           @RequestParam(value = "type", required = false) String type) {
         boardValidator.validate(board, result);
 
         if (result.hasErrors()) {
-            System.out.println(result.toString());
             return "board/form";
         }
-
         if (files != null) {
             System.out.println("files :::::::::" + files.toString());
             List<UploadFile> UploadFileId = fileupload(files);
@@ -248,10 +250,13 @@ public class BoardController {
             }
         }
 
+        if(!type.equals("modify")){
+            board.setViews(0l);
+        }
+
         String username = authentication.getName();
         boardService.save(username, board);
 
-        //boardRepository.save(board);
         return "redirect:/board/list";
     }
 
@@ -284,13 +289,6 @@ public class BoardController {
             String filePath = baseDir + "/" + modifileName;
 
             files.transferTo(new File(filePath));
-
-            System.out.println(modifileName);
-            System.out.println(filePath);
-            System.out.println(fileName);
-            System.out.println(size);
-            System.out.println(fileType);
-            System.out.println("uploadFile setting start");
 
             uploadFile.setFileName(fileName);
             uploadFile.setFileDownloadUri(filePath);
@@ -333,14 +331,113 @@ public class BoardController {
     // 댓글삭제
     @PostMapping("/commetdelete/{id}")
     public String commentdelete(@PathVariable("id") Long id,Long boardId, Authentication authentication) {
-        Comment comment = commentRepository.findById(id).orElse(null);
         // 이용자 체크
+        Comment comment = commentRepository.findById(id).orElse(null);
+        Long commentUserId = comment.getUserId();
+        User commentuser = userService.findById(commentUserId).orElse(null);
+        String commentUsername = commentuser.getUsername();
+        comment.setUsername(commentUsername);
         if (!checkUser(authentication,comment)){
             return "redirect:/board/list";
         }
 
         commentService.deleteComment(id);
         return "redirect:/board/view?id=" + boardId;
+    }
+
+
+    @PostMapping("/commetModify/{id}")
+    @ResponseBody
+    public String commetModify(@PathVariable("id") Long id){
+        Comment comment = commentRepository.findById(id).orElse(null);
+
+        Gson gson = new Gson();
+        String jsonString = gson.toJson(comment);
+        return jsonString;
+    }
+
+    //좋아요 여부체크
+    @PostMapping("/likecheck/{boardid}")
+    @ResponseBody
+    public String likecheck(@PathVariable("boardid") Long boardid,  Authentication authentication){
+        Map<String, Integer> resultMap = new HashMap<String,Integer>();
+        Boardlike boardlike = new Boardlike();
+        resultMap.put("result",0);
+
+        String username = authentication.getName();
+        User user = userService.findByUsername(username);
+
+        boardlike = boardlikeRepository.findByLikeContainingUserIdContainingBoardId(user.getId(),boardid);
+        System.out.println("boardlike ::: " + boardlike);
+        if (boardlike==null){
+            resultMap.put("result",0);
+        }else{
+            resultMap.put("result",1);
+        }
+
+        List<Boardlike> boardlikelist = boardlikeRepository.findByLikeContainingBoardId(boardid);
+        int boardlikenum = boardlikelist.size();
+        resultMap.put("boardlikenum", boardlikenum);
+
+        Gson gson = new Gson();
+        String jsonString = gson.toJson(resultMap);
+        return jsonString;
+    }
+
+    //좋아요 체크
+    @PostMapping("/like/{boardid}")
+    @ResponseBody
+    public String like(@PathVariable("boardid") Long boardid,  Authentication authentication){
+        Boardlike boardlike = new Boardlike();
+
+        Map<String, Integer> resultMap = new HashMap<String,Integer>();
+
+        resultMap.put("result",0);
+
+        String username = authentication.getName();
+        User user = userService.findByUsername(username);
+
+        boardlike.setBoardId(boardid);
+        boardlike.setUserId(user.getId());
+
+        boardlikeRepository.save(boardlike);
+        resultMap.put("result",1);
+
+        List<Boardlike> boardlikelist = boardlikeRepository.findByLikeContainingBoardId(boardid);
+        int boardlikenum = boardlikelist.size();
+        resultMap.put("boardlikenum", boardlikenum);
+
+        Gson gson = new Gson();
+        String jsonString = gson.toJson(resultMap);
+        return jsonString;
+    }
+
+    //좋아요 체크 해제
+    @PostMapping("/unlike/{boardid}")
+    @ResponseBody
+    public String unlike(@PathVariable("boardid") Long boardid,  Authentication authentication){
+        Boardlike boardlike = new Boardlike();
+
+        Map<String, Integer> resultMap = new HashMap<String,Integer>();
+
+        resultMap.put("result",0);
+
+        String username = authentication.getName();
+        User user = userService.findByUsername(username);
+
+        boardlike = boardlikeRepository.findByLikeContainingUserIdContainingBoardId(user.getId(),boardid);
+
+        boardlikeRepository.delete(boardlike);
+
+        resultMap.put("result",1);
+
+        List<Boardlike> boardlikelist = boardlikeRepository.findByLikeContainingBoardId(boardid);
+        int boardlikenum = boardlikelist.size();
+        resultMap.put("boardlikenum", boardlikenum);
+
+        Gson gson = new Gson();
+        String jsonString = gson.toJson(resultMap);
+        return jsonString;
     }
 
     // boardViews쿠키가 있을때
@@ -377,8 +474,6 @@ public class BoardController {
         Cookie[] myCookies = request.getCookies();
         if (!myCookies.equals(null) || (myCookies.length)!=0){
             for (Cookie myCookie : myCookies){
-                System.out.println("myCookie.getName() ::: " + myCookie.getName());
-                System.out.println("myCookie.getValue() ::: " + myCookie.getValue());
                 if(myCookie.getName().equals("boardViews")){
                     initflag=1;
                     String[] tempBoardNums = myCookie.getValue().split("/");
@@ -411,8 +506,9 @@ public class BoardController {
     private boolean checkUser(Authentication authentication, Board board){
         boolean result = false;
         String authUserName = authentication.getName();
-        String boardUserName = board.getUser().getUsername();
-        if (authUserName.equals(boardUserName)){
+        Long boardUserId = board.getUser().getId();
+        User user = userService.findById(boardUserId).orElse(null);
+        if (authUserName.equals(user.getUsername())){
             result = true;
         }else{
             result = false;

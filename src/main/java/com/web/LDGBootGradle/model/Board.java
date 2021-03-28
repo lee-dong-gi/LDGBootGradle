@@ -39,5 +39,8 @@ public class Board {
     private Long views;
 
     @Transient
+    private int like;
+
+    @Transient
     private int num;
 }

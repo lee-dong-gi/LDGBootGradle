@@ -17,6 +17,8 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
 
     List<Board> findByTitleAndContent(String title,String content);
 
+    List<Board> findByUserId(Long userId);
+
     /*
         기존 : findByTitleContainingOrContentContaining 
         OrderByIdDesc : id 컬럼 역순출력

@@ -19,6 +19,125 @@
 </head>
 
 <body>
+  <script type="text/javascript">
+  function commentModify(id){
+    $.ajax({
+      url : "commetModify/"+id,
+      type : "POST",
+      cache : false ,
+      dataType : "json",
+      data : "",
+      async : true ,
+      success: function(data){
+        $("#commentfield1").css("display","none");
+        $("#commentfield2").css("display","none");
+        $("#commentModify1").append(
+          "<div id='commentModify2'>" +
+          "<form action='/board/commentform' method='POST'>" +
+          "<input type='hidden' name='commentId' value='" + data['commentId'] + "'/>"+
+          "<input type='hidden' name='boardId' value='" + data['boardId'] + "'/>"+
+          "<textarea name='commentContent' placeholder='Enter your comment' rows='3' style='resize: none;'>" +
+          data['commentContent'] +
+          "</textarea>" +
+          "<button type='submit' class='button alt small'>Confirm</button>"+
+          "<button class='button alt small' onclick='commentModifyCancel()'>Cancel</button>" +
+          "</form>" +
+          "</div>"
+        );
+      },
+      error: function (request, status, error){
+        alert('오류가 발생하였습니다.');
+      }
+    });
+  }
+
+  function commentModifyCancel(){
+    $("#commentfield1").css("display","block");
+    $("#commentfield2").css("display","block");
+    $("#commentModify2").remove();
+  }
+
+  $(function() {
+    var boardid = $("#boardId").val();
+    $.ajax({
+      url : "likecheck/" + boardid,
+      type : "POST",
+      cache : false ,
+      dataType : "json",
+      data : "",
+      async : true ,
+      success: function(data){
+        if (data["result"] == 1){
+          $("#heart"+boardid).remove();
+          $("#heartbtn"+boardid).prepend("<span id='heart"+ boardid +"' class='heart-shape'><i class='fas fa-heart'></i> </span>");
+          $("#heartbtn"+boardid).removeAttr("onclick");
+          $("#heartbtn"+boardid).attr("onclick", "btnunlike("+ boardid + ");");
+        }else{
+          $("#heart"+boardid).remove();
+          $("#heartbtn"+boardid).prepend("<span id='heart"+ boardid +"' class='heart-shape'><i class='far fa-heart'></i> </span>");
+          $("#heartbtn"+boardid).removeAttr("onclick");
+          $("#heartbtn"+boardid).attr("onclick", "btnlike("+ boardid + ");");
+        }
+      },
+      error: function (request, status, error){
+        alert('오류가 발생하였습니다.');
+      }
+    });
+  });
+
+  function btnlike(id){
+    var boardid = $("#boardId").val();
+    $.ajax({
+      url : "like/" + boardid,
+      type : "POST",
+      cache : false ,
+      dataType : "json",
+      data : "",
+      async : true ,
+      success: function(data){
+        if (data["result"] == 1){
+          $("#heart"+id).remove();
+          $("#heartbtn"+id).prepend("<span id='heart"+ id +"' class='heart-shape'><i class='fas fa-heart'></i> </span>");
+          $("#heartbtn"+id).removeAttr("onclick");
+          $("#heartbtn"+id).attr("onclick", "btnunlike("+ id + ");");
+          $("#likenum").html(data["boardlikenum"]);
+        }else{
+          btnunlike(boardid);
+        }
+      },
+      error: function (request, status, error){
+        alert('오류가 발생하였습니다.');
+      }
+    });
+  }
+
+  function btnunlike(id){
+    var boardid = $("#boardId").val();
+    $.ajax({
+      url : "unlike/" + boardid,
+      type : "POST",
+      cache : false ,
+      dataType : "json",
+      data : "",
+      async : true ,
+      success: function(data){
+        if (data["result"] == 1){
+          $("#heart"+id).remove();
+          $("#heartbtn"+id).prepend("<span id='heart"+ id +"' class='heart-shape'><i class='far fa-heart'></i> </span>");
+          $("#heartbtn"+id).removeAttr("onclick");
+          $("#heartbtn"+id).attr("onclick", "btnlike("+ id + ");");
+          $("#likenum").html(data["boardlikenum"]);
+        }else{
+          btnunlike(boardid);
+        }
+      },
+      error: function (request, status, error){
+        alert('오류가 발생하였습니다.');
+      }
+    });
+
+  }
+  </script>
   <div th:replace="fragments/urbancommon :: top('Post')"></div>
 
   <div id="main">
@@ -26,7 +145,13 @@
       <div class="inner" th:object="${board}">
         <br/>
         <h2>Post</h2>
-        <div class="text-end">
+        <div class="like-container" style="display:inline;">
+          <button type="button" th:id="heartbtn+${board.id}" class="btn-like" onclick="btnlike(1)" th:onclick="'btnlike(' + ${board.id} + ')'">
+            <span th:id="heart+${board.id}" class="heart-shape"> <i class="far fa-heart"></i> </span>&nbsp;
+            <span id="likenum" th:text="${board.like}" class="like-count"> 1 </span>
+          </button>
+        </div>
+        <div class="text-end" style="display:inline; float:right;">
           <span th:text="*{user.username}"></span> &nbsp; | &nbsp;
           <span th:text="*{#temporals.format(createdDate, 'yyyy-MM-dd HH:mm')}"></span> &nbsp; | &nbsp;
           <span th:text="*{views}"></span>
@@ -65,27 +190,29 @@
         <label for="comment">comment</label>
         <div class="12u$(medium)">
           <form action="#" th:action="@{/board/commentform}" th:object="${board}" method="post">
-            <input type="hidden" name="boardId" th:value="*{id}">
+            <input type="hidden" id="boardId" name="boardId" th:value="*{id}">
             <textarea name="commentContent" id="commentContent" placeholder="Enter your comment" rows="6" style="resize: none;"></textarea>
             <div class="text-end my-1">
               <button type="submit" class="button alt small">write</button>
             </div>
           </form>
 				</div>
-        <hr>
         <div class="12u$(medium)" th:each="comment : ${comments}">
+          <input type="hidden" th:value="${comment.commentId}" th:id="'comId'+${comment.commentId}"/>
           <span class="image left"><i class="fas fa-user-alt"></i></span><strong><p th:text="${comment.username}">Lorem </p></strong>
-          <p th:text="${comment.commentContent}"></p>
-          <div th:if="${comment.commentselfcheck.equals('Y')}">
+          <p id="commentfield1" th:text="${comment.commentContent}"></p>
+          <div id="commentfield2" th:if="${comment.commentselfcheck.equals('Y')}">
             <form th:action="@{/board/commetdelete/}+${comment.commentId}" action="#" method="POST" style="float: right; transform: translate(-75px, -45px);">
+              <button type="button" class="button alt small" onclick="commentModify(1)" th:onclick="'commentModify('+${comment.commentId}+')'">modify</button>
               <button type="submit" class="button alt small">Delete</button>
               <input type="hidden" name="boardId" th:value="*{id}">
             </form>
           </div>
+          <div id="commentModify1" class="text-end"></div>
           <hr>
         </div>
         <br/>
-        <div class="table-wrapper">
+        <div class="12u$(medium)">
           <table class="" style="text-align: center;">
             <tbody>
               <tr style="background-color:#fafafa;" th:if="${nextBoard != null}">
