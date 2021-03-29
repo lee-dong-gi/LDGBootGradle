@@ -22,7 +22,7 @@
   <div id="main">
     <section class="wrapper style1">
       <div class="inner">
-        <h2>Post</h2>
+        <h1><strong>Post</strong></h1><br/>
         <form action="#" th:action="@{/board/form}" th:object="${board}" method="post" enctype="multipart/form-data">
           <input type="hidden" th:field="*{id}">
           <input type="hidden" name="views" th:value="*{views}">

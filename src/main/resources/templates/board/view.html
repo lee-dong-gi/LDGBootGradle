@@ -144,7 +144,7 @@
     <section class="wrapper style1">
       <div class="inner" th:object="${board}">
         <br/>
-        <h2>Post</h2>
+        <h1><strong>Post</strong></h1><br/>
         <div class="like-container" style="display:inline;">
           <button type="button" th:id="heartbtn+${board.id}" class="btn-like" onclick="btnlike(1)" th:onclick="'btnlike(' + ${board.id} + ')'">
             <span th:id="heart+${board.id}" class="heart-shape"> <i class="far fa-heart"></i> </span>&nbsp;

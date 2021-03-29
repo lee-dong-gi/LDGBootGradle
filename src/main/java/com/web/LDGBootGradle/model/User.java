@@ -20,6 +20,15 @@ public class User {
     private String password;
     private boolean enabled;
 
+    private String realname;
+    private String email;
+    private String postcode;
+    private String address;
+    private String extraAddress;
+    private String detailAddress;
+    private String introduce;
+
+
     @JsonIgnore //호출 시 해당 데이터 제외하고 뿌려줌
     @ManyToMany
     @JoinTable(
