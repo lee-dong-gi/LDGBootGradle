@@ -4,7 +4,7 @@
   <title th:text="${title}">Hello, Spring Boot</title>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  
+
   <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
   <link rel="stylesheet"  th:href="@{/css/main.css}" href="css/main.css" />
@@ -37,22 +37,22 @@
 <body>
   <div th:fragment="top(top)">
     <!-- Header -->
-    <header id="header" class="alt">
+    <header id="header">
       <!--jquery
       <div class="logo"><b><a th:href="@{/urban}" href="urbanindex.html">생각하는 <span>참새</span></a></b></div>
       <a th:href="@{/account/login}" href="#" class="button"><i class="fas fa-sign-in-alt">Login</i></a>
       -->
-      <div class="logo"><a th:href="@{/urban}" href="urbanindex.html"><i class="fas fa-home">Sprrow</i></a></div>
+      <div class="logo"><a th:href="@{/urban}" href="urbanindex.html" style="color: white;"> <i class="fas fa-home"> Sprrow</i></a></div>
       <a th:href="@{/account/login}" class="mx-1 button special small"
         sec:authorize="!isAuthenticated()"><i class="fas fa-sign-in-alt"> Sign In</i></a>
       <a th:href="@{/account/register}" class="mx-1 button special small"
         sec:authorize="!isAuthenticated()"><i class="fas fa-user-plus"> Sign Up</i></a>
       <form th:action="@{/logout}" method="POST" sec:authorize="isAuthenticated()" style="display: inline-block;" enctype="multipart/form-data">
-        <span class="mx-2" sec:authentication="name">사용자</span>
-        <span class="mx-2" sec:authentication="principal.authorities">권한</span>
+        <a th:href="@{/account/modify}" href="#" class="button special small"><i class="fas fa-user-circle"><span class="mx-2" sec:authentication="name">사용자</span></i></a>
+        <!--<span class="mx-2" sec:authentication="principal.authorities">권한</span>-->
         <button class="mx-1 button special small" type="submit" sec:authorize="isAuthenticated()"><i class="fas fa-sign-out-alt">Logout</i></button>
       </form>
-      <a href="#menu" class="mx-1 button special small">Menu</a>
+      <a href="#menu">Menu</a>
       <br/>
     </header>
 

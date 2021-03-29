@@ -4,7 +4,9 @@ import com.google.gson.Gson;
 import com.web.LDGBootGradle.model.User;
 import com.web.LDGBootGradle.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -28,9 +30,27 @@ public class AccountController {
         return "account/register";
     }
 
+    @GetMapping("/modify")
+    public String modify(Model model, Authentication authentication){
+        String username = authentication.getName();
+        User user = userService.findByUsername(username);
+        model.addAttribute("user",user);
+        return "account/modify";
+    }
+
     @PostMapping("/register")
     public String register(User user){
         userService.save(user);
+        return "redirect:/urban";
+    }
+
+    @PostMapping("/modify")
+    public String modify(User user, Authentication authentication){
+        String username = authentication.getName();
+        User originuser = userService.findByUsername(username);
+        user.setUsername(originuser.getUsername());
+        user.setId(originuser.getId());
+        userService.modify(user);
         return "redirect:/urban";
     }
 

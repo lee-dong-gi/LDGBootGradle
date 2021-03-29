@@ -31,6 +31,17 @@ public class UserService {
     }
 
     @Transactional
+    public User modify(User user){
+        String encodedPassword = passwordEncoder.encode(user.getPassword());
+        user.setPassword(encodedPassword);
+        user.setEnabled(true);
+        Role role = new Role();
+        role.setId(1l);
+        user.getRoles().add(role);
+        return userRepository.save(user);
+    }
+
+    @Transactional
     public Optional<User> findById(Long id) {
         return userRepository.findById(id);
     }

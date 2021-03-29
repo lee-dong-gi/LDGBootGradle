@@ -139,7 +139,7 @@
     if (id == ""){
       alert('사용하실 ID를 입력해주세요.');
       return false;
-    } else if (!idReg.test(checkusername)){
+    } else if (!idReg.test(id)){
       alert('"아이디는 영문자로 시작하는 6~13자 영문자 또는 숫자이어야 합니다."');
       return false;
     }
@@ -228,7 +228,7 @@
                 <span id="passwordtext" class="notify"></span>
               </div>
               <div class="12u$(xsmall)">
-                <input type="password" name="passwordcheck" id="passwordcheck" value="" placeholder="Enter password confirm" />
+                <input type="password" id="passwordcheck" value="" placeholder="Enter password confirm" />
                 <span id="passwordchecktext" class="notify"></span>
               </div>
             </div>
@@ -266,7 +266,7 @@
                 <input type="email" name="email" id="email" value="" placeholder="Enter Your Email" />
               </div>
               <div class="12u$">
-                <textarea name="introduction" id="introduction" placeholder="introduction" rows="4"></textarea>
+                <textarea name="introduce" id="introduce" placeholder="introduction" rows="4"></textarea>
                 <hr/>
               </div>
 
