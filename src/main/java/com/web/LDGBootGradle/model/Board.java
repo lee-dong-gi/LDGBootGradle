@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 @Entity
 @Data
 @EntityListeners(AuditingEntityListener.class)
+@org.hibernate.annotations.DynamicUpdate
 public class Board {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,13 +34,9 @@ public class Board {
     @Column(updatable = false) //업데이트 할때마다 같이 업데이트 됨 해결필요(조회수도)
     private LocalDateTime createdDate;
 
-    @LastModifiedDate
-    private LocalDateTime modifiedDate;
-
     private Long views;
 
-    @Transient
-    private int like;
+    private Long boardlike;
 
     @Transient
     private int num;

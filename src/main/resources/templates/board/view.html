@@ -148,7 +148,7 @@
         <div class="like-container" style="display:inline;">
           <button type="button" th:id="heartbtn+${board.id}" class="btn-like" onclick="btnlike(1)" th:onclick="'btnlike(' + ${board.id} + ')'">
             <span th:id="heart+${board.id}" class="heart-shape"> <i class="far fa-heart"></i> </span>&nbsp;
-            <span id="likenum" th:text="${board.like}" class="like-count"> 1 </span>
+            <span id="likenum" th:text="${boardlikenum}" class="like-count"> 1 </span>
           </button>
         </div>
         <div class="text-end" style="display:inline; float:right;">
@@ -168,7 +168,7 @@
               <hr />
               <label for="customFile">Attachments</label>
               <p>
-                <a th:href="${filepath}"><span th:text="${filename}">파일 다운로드</span></a>
+                <a th:href="${filepath}"><span th:text="${filename}">file</span></a>
               </p>
               <hr/>
             </header>
@@ -179,7 +179,7 @@
           <div class="text-end" >
             <a th:href="@{/board/list}" class="button alt" style="display: inline-block; float: left;">list</a>
             <div th:if="${selfcheck.equals('Y')}">
-              <a th:href="@{/board/form(id=${board.id})}" class="button alt" ><strong>Modify</strong></a>
+              <a th:href="@{/board/form(id=${board.id})}" class="button alt" >Modify</a>
               <form th:action="@{/board/delete/}+${board.id}" action="#" method="POST" style="display: inline-block;">
                 <button type="submit" class="button alt">Delete</button>
               </form>
@@ -218,7 +218,7 @@
               <tr style="background-color:#fafafa;" th:if="${nextBoard != null}">
                 <td style="width:10%;">Next</td>
                 <td>
-                  <a th:href="@{/board/view/} + '?id=' + ${nextBoard.id}">
+                  <a th:href="@{/board/view(id=${nextBoard.id})}">
                     <span th:text="${nextBoard.title}">다음글 제목</span>
                   </a>
                 </td>
@@ -229,7 +229,7 @@
               <tr style="background-color:#fafafa;" th:if="${prevBoard != null}">
                 <td style="width:10%;">Prev</td>
                 <td>
-                  <a th:href="@{/board/view/} + '?id=' + ${prevBoard.id}">
+                  <a th:href="@{/board/view(id=${prevBoard.id})}">
                     <span th:text="${prevBoard.title}">이전글 제목</span>
                   </a>
                 </td>

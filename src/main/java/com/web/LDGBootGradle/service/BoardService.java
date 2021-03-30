@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 public class BoardService {
 
@@ -31,4 +33,6 @@ public class BoardService {
 
     public Long findByNextObj(Long id){ return boardRepository.findByNextObj(id); }
     public Long findByPrevObj(Long id){ return boardRepository.findByPrevObj(id); }
+
+    public List<Board> findByRank(){ return boardRepository.findByRank(); }
 }

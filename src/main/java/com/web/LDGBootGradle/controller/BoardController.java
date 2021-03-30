@@ -14,6 +14,7 @@ import com.web.LDGBootGradle.validator.BoardValidator;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -161,8 +162,7 @@ public class BoardController {
         // 좋아요 수
         List<Boardlike> boardlikelist = boardlikeRepository.findByLikeContainingBoardId(id);
         int boardlikenum = boardlikelist.size();
-        System.out.println("boardlikenum ::: " + boardlikenum);
-        board.setLike(boardlikenum);
+        model.addAttribute("boardlikenum",boardlikenum);
 
         //다음글 이전글 리스트
         Long nextboardId = boardService.findByNextObj(id);
@@ -252,6 +252,19 @@ public class BoardController {
 
         if(!type.equals("modify")){
             board.setViews(0l);
+            board.setViews(0l);
+        }else{
+            List<Boardlike> boardlikelist = boardlikeRepository.findByLikeContainingBoardId(board.getId());
+            Board existboard = boardRepository.findById(board.getId()).orElse(null);
+            int boardlikenum = boardlikelist.size();
+
+            // 게시판 좋아요 및 조회수 컬럼 변경
+            Integer modifylike = boardlikenum;
+            Long modifylikenum = Long.valueOf(modifylike.toString());
+
+            board.setViews(existboard.getViews());
+            board.setBoardlike(modifylikenum);
+            System.out.println("board.getBoardlike() ::: "+board.getBoardlike());
         }
 
         String username = authentication.getName();
@@ -388,6 +401,7 @@ public class BoardController {
     @PostMapping("/like/{boardid}")
     @ResponseBody
     public String like(@PathVariable("boardid") Long boardid,  Authentication authentication){
+        System.out.println("boardid ::: " + boardid);
         Boardlike boardlike = new Boardlike();
 
         Map<String, Integer> resultMap = new HashMap<String,Integer>();
@@ -406,6 +420,13 @@ public class BoardController {
         List<Boardlike> boardlikelist = boardlikeRepository.findByLikeContainingBoardId(boardid);
         int boardlikenum = boardlikelist.size();
         resultMap.put("boardlikenum", boardlikenum);
+
+        // 게시판 좋아요 컬럼 변경
+        Board existBoard = boardRepository.findById(boardid).orElse(null);
+        Integer modifylike = boardlikenum;
+        Long modifylikenum = Long.valueOf(modifylike.toString());
+        existBoard.setBoardlike(modifylikenum);
+        boardRepository.save(existBoard);
 
         Gson gson = new Gson();
         String jsonString = gson.toJson(resultMap);
@@ -434,6 +455,13 @@ public class BoardController {
         List<Boardlike> boardlikelist = boardlikeRepository.findByLikeContainingBoardId(boardid);
         int boardlikenum = boardlikelist.size();
         resultMap.put("boardlikenum", boardlikenum);
+
+        // 게시판 좋아요 컬럼 변경
+        Board existBoard = boardRepository.findById(boardid).orElse(null);
+        Integer modifylike = boardlikenum;
+        Long modifylikenum = Long.valueOf(modifylike.toString());
+        existBoard.setBoardlike(modifylikenum);
+        boardRepository.save(existBoard);
 
         Gson gson = new Gson();
         String jsonString = gson.toJson(resultMap);
@@ -527,5 +555,22 @@ public class BoardController {
             result = false;
         }
         return result;
+    }
+
+
+
+    public static void copyNonNullProperties(Object src, Object target) {
+        BeanUtils.copyProperties(src, target, getNullPropertyNames(src));
+    }
+    public static String[] getNullPropertyNames (Object source) {
+        final BeanWrapper src = new BeanWrapperImpl(source);
+        java.beans.PropertyDescriptor[] pds = src.getPropertyDescriptors();
+        Set<String> emptyNames = new HashSet<String>();
+        for(java.beans.PropertyDescriptor pd : pds) {
+            Object srcValue = src.getPropertyValue(pd.getName());
+            if (srcValue == null) emptyNames.add(pd.getName());
+        }
+        String[] result = new String[emptyNames.size()];
+        return emptyNames.toArray(result);
     }
 }

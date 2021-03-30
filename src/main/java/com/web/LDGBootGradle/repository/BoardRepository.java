@@ -34,4 +34,10 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
     @Nullable
     @Query(value = "SELECT MAX(id) FROM board WHERE id < ?1", nativeQuery = true)
     Long findByPrevObj(Long id);
+
+    //좋아요 rank
+    @Nullable
+    @Query(value = "SELECT *,RANK() OVER(ORDER BY boardlike DESC) 'rank' FROM board", nativeQuery = true)
+    List<Board> findByRank();
+
 }

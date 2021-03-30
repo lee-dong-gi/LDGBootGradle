@@ -51,14 +51,13 @@
 								<div class="flex flex-2">
 									<div class="col col1">
 										<div class="image round fit">
-											<a href="generic.html" class="link"><img th:src="@{/images/pic01.jpg}" src="images/pic01.jpg" alt="" /></a>
+											<a href="generic.html" class="link"><img th:src="@{/download/show/}+${rankboard[0].uploadFileId}" src="images/pic01.jpg" alt="" /></a>
 										</div>
 									</div>
 									<div class="mx-3 col col2">
-										<h3>Suspendisse quis massa vel justo</h3>
-										<p>Etiam posuere hendrerit arcu, ac blandit nulla. Sed congue malesuada nibh, a varius odio vehicula aliquet. Aliquam consequat, nunc quis sollicitudin aliquet, enim magna cursus auctor lacinia nunc ex blandit augue. Ut vitae neque fermentum, luctus elit fermentum, porta augue. Nullam ultricies, turpis at fermentum iaculis, nunc justo dictum dui, non aliquet erat nibh non ex.</p>
-										<p>Sed congue malesuada nibh, a varius odio vehicula aliquet. Aliquam consequat, nunc quis sollicitudin aliquet, enim magna cursus auctor lacinia nunc ex blandit augue. Ut vitae neque fermentum, luctus elit fermentum, porta augue. Nullam ultricies, turpis at fermentum iaculis, nunc justo dictum dui, non aliquet erat nibh non ex. </p>
-										<a href="#" class="button">더 보기</a>
+										<h3 th:text="${rankboard[0].title}">title</h3>
+										<p th:text="${rankboard[0].content}">content</p>
+										<a th:href="@{board/view?id=}+${rankboard[0].id}" class="button">View more</a>
 									</div>
 								</div>
 						</div>
@@ -69,14 +68,13 @@
 						<div class="inner">
 							<div class="flex flex-2">
 								<div class="col col2">
-									<h3>Suspendisse quis massa vel justo</h3>
-									<p>Etiam posuere hendrerit arcu, ac blandit nulla. Sed congue malesuada nibh, a varius odio vehicula aliquet. Aliquam consequat, nunc quis sollicitudin aliquet, enim magna cursus auctor lacinia nunc ex blandit augue. Ut vitae neque fermentum, luctus elit fermentum, porta augue. Nullam ultricies, turpis at fermentum iaculis, nunc justo dictum dui, non aliquet erat nibh non ex.</p>
-									<p>Sed congue malesuada nibh, a varius odio vehicula aliquet. Aliquam consequat, nunc quis sollicitudin aliquet, enim magna cursus auctor lacinia nunc ex blandit augue. Ut vitae neque fermentum, luctus elit fermentum, porta augue. Nullam ultricies, turpis at fermentum iaculis, nunc justo dictum dui, non aliquet erat nibh non ex. </p>
-									<a href="#" class="button">더 보기</a>
+									<h3 th:text="${rankboard[1].title}">title</h3>
+									<p th:text="${rankboard[1].content}">content</p>
+									<a th:href="@{board/view?id=}+${rankboard[1].id}" class="button">View more</a>
 								</div>
 								<div class="col col1 first">
 									<div class="image round fit">
-										<a href="generic.html" class="link"><img th:src="@{/images/pic02.jpg}" src="images/pic02.jpg" alt="" /></a>
+										<a href="generic.html" class="link"><img th:src="@{/download/show/}+${rankboard[1].uploadFileId}" src="images/pic02.jpg" alt="" /></a>
 									</div>
 								</div>
 							</div>
@@ -87,30 +85,30 @@
 					<section class="wrapper style1">
 						<div class="inner">
 							<header class="align-center">
-								<h2>Aliquam ipsum purus dolor</h2>
+								<h2>Aliquam ipsum purus dolor</h2><br/>
 								<p>Cras sagittis turpis sit amet est tempus, sit amet consectetur purus tincidunt.</p>
 							</header>
 							<div class="flex flex-3">
 								<div class="col align-center">
 									<div class="image round fit">
-										<img th:src="@{/images/pic03.jpg}" src="images/pic03.jpg" alt="" />
+										<img th:src="@{/download/show/}+${rankboard[2].uploadFileId}" src="images/pic03.jpg" alt="" />
 									</div>
-									<p>Sed congue elit malesuada nibh, a varius odio vehicula aliquet. Aliquam consequat, nunc quis sollicitudin aliquet. </p>
-									<a href="#" class="button">더 보기</a>
+									<p th:text="${rankboard[2].content}">text</p>
+									<a th:href="@{board/view?id=}+${rankboard[2].id}" href="#" class="button">View more</a>
 								</div>
 								<div class="col align-center">
 									<div class="image round fit">
-										<img th:src="@{/images/pic05.jpg}" src="images/pic05.jpg" alt="" />
+										<img th:src="@{/download/show/}+${rankboard[3].uploadFileId}" src="images/pic05.jpg" alt="" />
 									</div>
-									<p>Sed congue elit malesuada nibh, a varius odio vehicula aliquet. Aliquam consequat, nunc quis sollicitudin aliquet. </p>
-									<a href="#" class="button">더 보기</a>
+									<p th:text="${rankboard[3].content}">text</p>
+									<a th:href="@{board/view?id=}+${rankboard[3].id}" class="button">View more</a>
 								</div>
 								<div class="col align-center">
 									<div class="image round fit">
-										<img th:src="@{/images/pic04.jpg}" src="images/pic04.jpg" alt="" />
+										<img th:src="@{/download/show/}+${rankboard[4].uploadFileId}" src="images/pic04.jpg" alt="" />
 									</div>
-									<p>Sed congue elit malesuada nibh, a varius odio vehicula aliquet. Aliquam consequat, nunc quis sollicitudin aliquet. </p>
-									<a href="#" class="button">더 보기</a>
+									<p th:text="${rankboard[4].content}">text</p>
+									<a th:href="@{board/view?id=}+${rankboard[4].id}" class="button">View more</a>
 								</div>
 							</div>
 						</div>
