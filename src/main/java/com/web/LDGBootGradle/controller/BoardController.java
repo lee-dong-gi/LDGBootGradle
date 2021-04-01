@@ -73,8 +73,9 @@ public class BoardController {
     @GetMapping("/list")
     public String list(Model model, @PageableDefault(size = 10) Pageable pageable,
                        @RequestParam(required = false, defaultValue = "") String searchText) {
-        // Page<Board> boards = boardRepository.findAll(pageable);
+
         Page<Board> boards = boardRepository.findByTitleContainingOrContentContainingOrderByIdDesc(searchText, searchText, pageable);
+
         //=========================numbering===========================================================================
         int num = 0, result = 0, pagesize = 10;
         int totalElements = (int) boards.getTotalElements() + 1;
@@ -91,6 +92,7 @@ public class BoardController {
             temp.setNum(result);
         }
         //====================================================================================================
+
         int startPage = Math.max(1, boards.getPageable().getPageNumber() - 4);
         int endPage = Math.min(boards.getTotalPages(), boards.getPageable().getPageNumber() + 4);
         model.addAttribute("startPage", startPage);
@@ -239,6 +241,7 @@ public class BoardController {
         if (result.hasErrors()) {
             return "board/form";
         }
+
         if (files != null) {
             List<UploadFile> UploadFileId = fileupload(files);
             int listsize = UploadFileId.size() - 1;
@@ -275,12 +278,10 @@ public class BoardController {
     //파일 업로드
     List<UploadFile> fileupload(MultipartFile files) {
         UploadFile uploadFile = new UploadFile();
-        System.out.println("fileupload start");
         List<UploadFile> uploadFileList = new ArrayList<UploadFile>();
         try {
 
             String baseDir = "D:/intelij/spring/LDGBootGradle/src/main/resources/static/uploads";
-
 
             Long size = files.getSize();
             String fileType = files.getContentType();
@@ -481,17 +482,14 @@ public class BoardController {
         myCookie.setMaxAge(10000000); // 쿠키의 expiration 타임을 0으로 하여 없앤다.
         myCookie.setPath("/"); // 모든 경로에서 삭제 됬음을 알린다.
         response.addCookie(myCookie);
-        System.out.println("setCookies ::: " + myCookie.toString());
     }
 
     //쿠키가 아예없으면
     private void initCookies (HttpServletRequest request, Long boardnum, HttpServletResponse response){
-        System.out.println("start initCookies");
         Cookie myCookie = new Cookie("boardViews", boardnum.toString());
         myCookie.setMaxAge(10000000); // 쿠키의 expiration 타임을 0으로 하여 없앤다.
         myCookie.setPath("/"); // 모든 경로에서 삭제 됬음을 알린다.
         response.addCookie(myCookie);
-        System.out.println("initCookies ::: " + myCookie.toString());
     }
     
     //특정 게시글 조회이력 확인 및 쿠키세팅
@@ -505,24 +503,15 @@ public class BoardController {
                     initflag=1;
                     String[] tempBoardNums = myCookie.getValue().split("/");
                     for(String tempBoardNum : tempBoardNums){
-                        System.out.println("tempBoardNum ::: " + tempBoardNum);
                         if (tempBoardNum.equals(boardnum.toString())){
-                            System.out.println("dupcheck!");
                             flag = 1;
                             return flag;
                         }
                     }
                 }
             }
-            if (flag==0 & initflag==1){ setCookies(request, boardnum, response, myCookies);
-                System.out.println("flag ::: " + flag);
-                return flag;
-            }
-            else{
-                initCookies(request, boardnum, response);
-                System.out.println("flag ::: " + flag);
-                return flag;
-            }
+            if (flag==0 & initflag==1){ setCookies(request, boardnum, response, myCookies); return flag; }
+            else{ initCookies(request, boardnum, response); return flag; }
         }else{
             initCookies(request, boardnum, response);
             return flag;

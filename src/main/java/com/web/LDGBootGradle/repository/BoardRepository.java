@@ -23,6 +23,7 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
         기존 : findByTitleContainingOrContentContaining 
         OrderByIdDesc : id 컬럼 역순출력
      */
+
     Page<Board> findByTitleContainingOrContentContainingOrderByIdDesc(String title, String content, Pageable pageable);
 
     //다음글
