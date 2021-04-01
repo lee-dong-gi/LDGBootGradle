@@ -240,7 +240,6 @@ public class BoardController {
             return "board/form";
         }
         if (files != null) {
-            System.out.println("files :::::::::" + files.toString());
             List<UploadFile> UploadFileId = fileupload(files);
             int listsize = UploadFileId.size() - 1;
             if (listsize < 0 || UploadFileId.isEmpty()) {
@@ -252,7 +251,7 @@ public class BoardController {
 
         if(!type.equals("modify")){
             board.setViews(0l);
-            board.setViews(0l);
+            board.setBoardlike(0l);
         }else{
             List<Boardlike> boardlikelist = boardlikeRepository.findByLikeContainingBoardId(board.getId());
             Board existboard = boardRepository.findById(board.getId()).orElse(null);

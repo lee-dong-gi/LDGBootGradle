@@ -9,6 +9,8 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Data
@@ -31,7 +33,7 @@ public class Board {
     private User user;
 
     @CreatedDate
-    @Column(updatable = false) //업데이트 할때마다 같이 업데이트 됨 해결필요(조회수도)
+    @Column(updatable = false)
     private LocalDateTime createdDate;
 
     private Long views;

@@ -1,0 +1,60 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<!--
+	Urban by TEMPLATED
+	templated.co @templatedco
+	Released for free under the Creative Commons Attribution 3.0 license (templated.co/license)
+-->
+	<head th:replace="fragments/urbancommon :: head('DailyGram')">
+		<title>달리는 참새</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<link rel="stylesheet"  th:href="@{/css/main.css}" href="css/main.css" />
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.8.2/css/all.min.css" integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossorigin="anonymous">
+	</head>
+	<body>
+
+		<div th:replace="fragments/urbancommon :: top('top')">
+			<!-- Header -->
+			<header id="header" class="alt">
+				<div class="logo"><b><a th:href="@{/urban}" href="urbanindex.html">생각하는 <span>참새</span></a></b></div>
+				<a th:href="@{/account/login}" href="#" class="button"><i class="fas fa-sign-in-alt">Login</i></a>
+				<a href="#menu">Menu</a>
+			</header>
+
+		<!-- Nav -->
+			<nav id="menu">
+				<ul class="links">
+					<li><a th:href="@{/urban}" href="index.html">Home</a></li>
+					<li><a href="#" th:href="@{/board/list}">Board</a></li>
+					<li><a th:href="@{/elements.html}" href="elements.html">Elements</a></li>
+				</ul>
+			</nav>
+		</div>
+    <div id="main">
+      <section class="wrapper style1">
+        <div class="inner">
+
+          <header class="align-center">
+            <h1>Error <span th:text="${code}"></span></h1><br/>
+            <p><span th:text="${msg}"></span></p>
+            <p><span th:text="${timestamp}"></p>
+          </header>
+
+        </div>
+      </section>
+    </div>
+		<!-- Footer -->
+			<footer id="footer" th:replace="fragments/footer :: footer('footer')">
+				<div class="copyright">
+					<ul class="icons">
+						<li><a href="#" class="icon fa-twitter"><span class="label">Twitter</span></a></li>
+						<li><a href="#" class="icon fa-facebook"><span class="label">Facebook</span></a></li>
+						<li><a href="#" class="icon fa-instagram"><span class="label">Instagram</span></a></li>
+						<li><a href="#" class="icon fa-snapchat"><span class="label">Snapchat</span></a></li>
+					</ul>
+					<p>&copy; Untitled. All rights reserved. Design: <a href="https://templated.co">TEMPLATED</a>. Images: <a href="https://unsplash.com">Unsplash</a>.</p>
+				</div>
+			</footer>
+	</body>
+</html>
